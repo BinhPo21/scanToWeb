@@ -58,7 +58,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 </div>
 <div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div>
 <div class="camera-controls">
-<button id="flashButton" class="flash-button" type="button">🔦 BẬT FLASH</button>
+<button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button>
 </div>
 <div id="status" class="status">Đang tải bộ quét QR...</div>
 <div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ CHỌN ẢNH ĐỂ QUÉT QR</label></div>
@@ -116,6 +116,7 @@ async function dungCamera(){
  flashDangBat=false;
  flashButton.classList.remove("on");
  flashButton.textContent="🔦 BẬT FLASH";
+ flashButton.style.display="none";
  if(controls){
   try{controls.stop()}catch(_){}
   controls=null;
@@ -143,9 +144,16 @@ async function khoiDong(){
   const stream=video.srcObject;
   videoTrack=stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
   const capabilities=videoTrack && videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-  flashButton.disabled=!capabilities.torch;
-  flashButton.style.opacity=capabilities.torch ? "1" : ".55";
-  flashButton.textContent=capabilities.torch ? "🔦 BẬT FLASH" : "🔦 FLASH KHÔNG HỖ TRỢ";
+
+  // Chi hien nut Flash khi camera ho tro torch.
+  if (capabilities && capabilities.torch === true) {
+    flashButton.style.display = "block";
+    flashButton.disabled = false;
+    flashButton.style.opacity = "1";
+    flashButton.textContent = "🔦 BẬT FLASH";
+  } else {
+    flashButton.style.display = "none";
+  }
 
   statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";
  }catch(e){console.error(e);statusBox.textContent="Không khởi động được Camera: "+(e.message||e);statusBox.className="status error"}
@@ -200,8 +208,7 @@ flashButton.addEventListener("click",async()=>{
   flashDangBat=false;
   flashButton.classList.remove("on");
   flashButton.textContent="🔦 BẬT FLASH";
-  statusBox.textContent="⚠️ Không thể điều khiển Flash trên thiết bị này.";
-  statusBox.className="status error";
+  flashButton.style.display="none";
  }
 });
 
