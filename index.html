@@ -4,8 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#4f46e5">
-  <title>Quét mã đơn hàng</title>
-
+  <title>Quét mã sản phẩm</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -41,28 +40,23 @@
     }
     #reader {
       width: 100%;
-      height: 280px;
+      height: 220px;
       overflow: hidden;
       border-radius: 12px;
       background: #111;
       position: relative;
     }
-
-    /* Camera chi hien mot khung ngang gon, phu hop Barcode CODE 128 */
     #reader video {
       width: 100% !important;
-      height: 280px !important;
-      max-height: 280px !important;
+      height: 220px !important;
+      max-height: 220px !important;
       object-fit: cover !important;
       border-radius: 12px;
     }
-
-    /* Giu khung quet nam gon trong vung camera */
     #reader__scan_region {
       min-height: 0 !important;
-      height: 280px !important;
+      height: 220px !important;
     }
-
     #reader__scan_region img {
       display: none !important;
     }
@@ -86,7 +80,7 @@
     .manual {
       margin-top: 10px;
       border-top: 1px solid #e5e7eb;
-      padding-top: 12px;
+      padding-top: 10px;
     }
     label {
       display: block;
@@ -127,8 +121,8 @@
 <body>
   <main class="wrap">
     <section class="card">
-      <h1>📷 Quét mã đơn hàng</h1>
-      <p class="sub">Đưa Barcode vào giữa khung → tự mở Google Form</p>
+      <h1>📷 Quét mã sản phẩm</h1>
+      <p class="sub">Quét QR → tự điền Google Form</p>
 
       <div id="reader"></div>
 
@@ -137,14 +131,14 @@
       </div>
 
       <div class="manual">
-        <label for="manualCode">Máy quét Bluetooth hoặc nhập thủ công</label>
+        <label for="manualCode">Nhập mã QR nếu cần</label>
         <input id="manualCode" type="text" autocomplete="off"
-               placeholder="Quét mã vào đây nếu dùng máy quét">
+               placeholder="Dán chuỗi QR vào đây">
         <button id="openButton" type="button">Mở Google Form</button>
       </div>
 
       <div class="info">
-        Chỉ nhận CODE 128 để tăng tốc độ nhận diện.
+        QR phải có đúng 6 giá trị, ngăn cách bằng dấu |.
       </div>
     </section>
   </main>
@@ -155,37 +149,61 @@
   // ============================================================
 
   const FORM_URL =
-    "https://docs.google.com/forms/d/e/1FAIpQLSfI5TyKALA7hhb6UwHx4-GvgxRbC1-mx32z7PcvEk1CWJTpRg/viewform";
+    "https://docs.google.com/forms/d/e/1FAIpQLSdGFniU6DwdOeNJ5rbvE7cbEVwHiCKQe8skzRx-4ktXtK5hQQ/viewform";
 
-  const ENTRY_ID = "entry.850710254";
+  // Thứ tự dữ liệu trong QR:
+  // 1. Khách Hàng       -> entry.392564381
+  // 2. Đơn Hàng         -> entry.682796725
+  // 3. Mã Lệnh          -> entry.260788272
+  // 4. Quy Cách SX      -> entry.632173225
+  // 5. Màu Sắc          -> entry.2147420635
+  // 6. Số Lượng YC      -> entry.697190504
 
-
-  // ============================================================
-  // XỬ LÝ MÃ
-  // ============================================================
-
-  const statusBox = document.getElementById("status");
-  const manualInput = document.getElementById("manualCode");
-  const openButton = document.getElementById("openButton");
+  const ENTRY_IDS = [
+    "entry.392564381",
+    "entry.682796725",
+    "entry.260788272",
+    "entry.632173225",
+    "entry.2147420635",
+    "entry.697190504"
+  ];
 
   let daQuet = false;
 
-  function moGoogleForm(maDonHang) {
-    maDonHang = String(maDonHang ?? "").trim();
+  function taoLinkForm(chuoiQR) {
+    const parts = String(chuoiQR ?? "").split("|");
 
-    if (!maDonHang) {
-      statusBox.textContent = "Chưa có mã đơn hàng.";
-      statusBox.className = "status error";
-      return;
+    if (parts.length !== ENTRY_IDS.length) {
+      throw new Error(
+        "QR không đúng cấu trúc. Cần 6 giá trị, nhưng nhận được " +
+        parts.length + " giá trị."
+      );
     }
 
-    const url = FORM_URL + "?usp=pp_url&" +
-                ENTRY_ID + "=" + encodeURIComponent(maDonHang);
+    const params = new URLSearchParams();
+    params.set("usp", "pp_url");
 
-    statusBox.textContent = "Đã quét: " + maDonHang;
-    statusBox.className = "status ok";
+    for (let i = 0; i < ENTRY_IDS.length; i++) {
+      params.set(ENTRY_IDS[i], parts[i].trim());
+    }
 
-    window.location.replace(url);
+    return FORM_URL + "?" + params.toString();
+  }
+
+  function moGoogleForm(chuoiQR) {
+    try {
+      const url = taoLinkForm(chuoiQR);
+
+      statusBox.textContent =
+        "Đã quét đủ 6 thông tin — đang mở Form...";
+      statusBox.className = "status ok";
+
+      window.location.replace(url);
+    } catch (error) {
+      statusBox.textContent = error.message;
+      statusBox.className = "status error";
+      daQuet = false;
+    }
   }
 
   function xuLyMaQuet(ma) {
@@ -196,7 +214,6 @@
       window.scanner.stop().catch(() => {});
     }
 
-    // Cho trình duyệt có thời gian xử lý frame cuối rồi chuyển trang.
     setTimeout(function () {
       moGoogleForm(ma);
     }, 60);
@@ -213,46 +230,46 @@
     }
   });
 
+  const statusBox = document.getElementById("status");
+  const manualInput = document.getElementById("manualCode");
 
   // ============================================================
-  // CAMERA + SCANNER TỐI ƯU
+  // CAMERA - CHỈ QUÉT QR CODE
   // ============================================================
 
   if (!window.Html5Qrcode) {
     statusBox.textContent =
-      "Không tải được thư viện quét Barcode.";
+      "Không tải được thư viện quét QR.";
     statusBox.className = "status error";
   } else {
-    // Chỉ CODE_128.
-    // Không bắt QR/EAN/UPC/Code39... giúp giảm công việc nhận diện.
+    window.scanner = new Html5Qrcode("reader", {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.QR_CODE
+      ],
+      useBarCodeDetectorIfSupported: true,
+      verbose: false
+    });
+
     const config = {
       fps: 15,
 
-      // Barcode Code 128 dài và nằm ngang nên vùng quét ngang,
-      // thấp hơn sẽ giảm số điểm ảnh cần xử lý.
       qrbox: function(viewfinderWidth, viewfinderHeight) {
-        const width = Math.min(viewfinderWidth * 0.92, 520);
-        const height = Math.min(Math.max(width * 0.30, 120), 170);
+        const size = Math.min(viewfinderWidth * 0.70, 210);
         return {
-          width: Math.floor(width),
-          height: Math.floor(height)
+          width: Math.floor(size),
+          height: Math.floor(size)
         };
       },
 
       aspectRatio: 16 / 9,
 
       formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128
+        Html5QrcodeSupportedFormats.QR_CODE
       ],
 
-      // Nếu Chrome/Android hỗ trợ BarcodeDetector thì dùng bộ
-      // nhận diện native, thường nhanh hơn decoder JavaScript.
       useBarCodeDetectorIfSupported: true,
-
-      // Không cần đọc Barcode bị lật ngang vì đang dùng camera sau.
       disableFlip: true,
 
-      // Yêu cầu camera sau, ưu tiên HD vừa phải để nhận diện nhanh.
       videoConstraints: {
         facingMode: { ideal: "environment" },
         width: { ideal: 1280 },
@@ -261,14 +278,6 @@
       }
     };
 
-    window.scanner = new Html5Qrcode("reader", {
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128
-      ],
-      useBarCodeDetectorIfSupported: true,
-      verbose: false
-    });
-
     scanner.start(
       { facingMode: "environment" },
       config,
@@ -276,11 +285,11 @@
         xuLyMaQuet(decodedText);
       },
       function() {
-        // Không hiển thị lỗi của từng frame.
+        // Bỏ qua lỗi của từng khung hình.
       }
     ).then(function() {
       statusBox.textContent =
-        "Sẵn sàng — đưa CODE 128 vào khung.";
+        "Sẵn sàng — đưa QR vào giữa khung.";
       statusBox.className = "status";
     }).catch(function(error) {
       statusBox.textContent =
