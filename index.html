@@ -261,19 +261,19 @@
 
     scanner = new Html5Qrcode("reader", {
       formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      useBarCodeDetectorIfSupported: true,
+      useBarCodeDetectorIfSupported: false,
       verbose: false
     });
 
     // Cấu hình gọn, không ép videoConstraints để tránh xung đột
     // với một số Chrome/Android.
     const config = {
-      fps: 12,
+      fps: 10,
       qrbox: function (viewfinderWidth, viewfinderHeight) {
         const size = Math.min(
-          viewfinderWidth * 0.72,
-          viewfinderHeight * 0.78,
-          210
+          viewfinderWidth * 0.78,
+          viewfinderHeight * 0.68,
+          320
         );
 
         return {
@@ -281,9 +281,8 @@
           height: Math.floor(size)
         };
       },
-      aspectRatio: 16 / 9,
       formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      useBarCodeDetectorIfSupported: true,
+      useBarCodeDetectorIfSupported: false,
       disableFlip: true
     };
 
@@ -300,7 +299,7 @@
       }
     ).then(function () {
       statusBox.textContent =
-        "San sang - dua QR vao giua khung.";
+        "San sang - dua QR vao giua khung, giu cach khoang 15-30 cm.";
       statusBox.className = "status";
     }).catch(function (error) {
       console.error(error);
