@@ -19,10 +19,32 @@ h1{margin:0 0 5px;font-size:22px;text-align:center}
 .scan-box:before{left:-4px;top:-4px;border-width:7px 0 0 7px}
 .scan-box:after{right:-4px;bottom:-4px;border-width:0 7px 7px 0}
 .status{margin-top:8px;padding:9px;border-radius:9px;background:#f3f4f6;font-size:13px;text-align:center;word-break:break-word}
-.status.ok{background:#ecfdf5;color:#065f46}.status.error{background:#fef2f2;color:#991b1b}
-#formContainer{display:none;margin-top:12px}
+.status.ok{background:#ecfdf5;color:#065f46}
+.status.error{background:#fef2f2;color:#991b1b}
+
+#formContainer{display:none;margin-top:12px;padding-bottom:78px}
 #googleForm{width:100%;height:900px;display:block;border:none;border-radius:12px;background:#fff}
-#btnScanAgain{width:100%;min-height:48px;margin-top:10px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-size:16px;font-weight:700}
+
+/* Nut quet lai co dinh theo man hinh, luon nhin thay khi cuon Form */
+#btnScanAgain{
+position:fixed;
+left:50%;
+bottom:14px;
+transform:translateX(-50%);
+width:min(520px,calc(100vw - 28px));
+min-height:54px;
+z-index:99999;
+border:0;
+border-radius:12px;
+background:#16a34a;
+color:#fff;
+font-size:17px;
+font-weight:700;
+box-shadow:0 4px 18px rgba(0,0,0,.28);
+-webkit-tap-highlight-color:transparent;
+}
+#btnScanAgain:active{transform:translateX(-50%) scale(.98)}
+
 .manual{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px}
 label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
 input{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-radius:9px;font-size:16px;outline:none}
@@ -35,7 +57,11 @@ input{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-ra
 <h1>📷 Quét QR Tờ Lệnh @BinhPo21</h1>
 <p class="sub">Quét QR → tự điền Google Form</p>
 
-<div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div>
+<div class="camera" id="cameraBox">
+<video id="video" playsinline muted></video>
+<div class="scan-box"></div>
+</div>
+
 <div id="status" class="status">Đang tải bộ quét QR...</div>
 
 <div id="formContainer">
@@ -48,6 +74,7 @@ input{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-ra
 <input id="manualCode" type="text" autocomplete="off" placeholder="Dán chuỗi QR vào đây">
 <button id="openButton" type="button">Mở Google Form</button>
 </div>
+
 <div class="info">QR gồm 6 giá trị, ngăn cách bằng dấu |.</div>
 </section></main>
 
@@ -70,7 +97,7 @@ const manualBox=document.getElementById("manualBox");
 const manualInput=document.getElementById("manualCode");
 const openButton=document.getElementById("openButton");
 
-let reader=null, controls=null, daQuet=false;
+let reader=null,controls=null,daQuet=false;
 
 function taoLinkForm(chuoiQR){
  const parts=String(chuoiQR??"").trim().split("|");
