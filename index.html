@@ -1,579 +1,175 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#4f46e5">
-  <title>Quét QR Tờ Lệnh @BinhPo21</title>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    .wrap {
-      width: min(560px, 100%);
-      margin: 0 auto;
-      padding: 12px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 3px 14px rgba(0,0,0,.08);
-    }
-
-    h1 {
-      margin: 0 0 5px;
-      font-size: 22px;
-      text-align: center;
-    }
-
-    .sub {
-      margin: 0 0 12px;
-      text-align: center;
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    .camera {
-      width: 100%;
-      height: 440px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      background: #111;
-    }
-
-    #video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      background: #111;
-    }
-
-    .scan-box {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: min(72vw, 330px);
-      height: min(72vw, 330px);
-      transform: translate(-50%, -50%);
-      border: 4px solid rgba(255,255,255,.95);
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
-    .scan-box::before,
-    .scan-box::after {
-      content: "";
-      position: absolute;
-      width: 70px;
-      height: 70px;
-      border-color: #fff;
-      border-style: solid;
-    }
-
-    .scan-box::before {
-      left: -4px;
-      top: -4px;
-      border-width: 7px 0 0 7px;
-    }
-
-    .scan-box::after {
-      right: -4px;
-      bottom: -4px;
-      border-width: 0 7px 7px 0;
-    }
-
-    .status {
-      margin-top: 8px;
-      padding: 9px;
-      border-radius: 9px;
-      background: #f3f4f6;
-      font-size: 13px;
-      text-align: center;
-      word-break: break-word;
-    }
-
-    .status.ok {
-      background: #ecfdf5;
-      color: #065f46;
-    }
-
-    .status.error {
-      background: #fef2f2;
-      color: #991b1b;
-    }
-
-    #imageScanBox {
-      margin-top: 10px;
-    }
-
-    #imageInput {
-      display: none;
-    }
-
-    #imagePicker {
-      display: block;
-      width: 100%;
-      min-height: 48px;
-      line-height: 48px;
-      text-align: center;
-      border-radius: 10px;
-      background: #2563eb;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #imagePicker:active {
-      transform: scale(.99);
-    }
-
-    .manual {
-      margin-top: 10px;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 10px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      min-height: 46px;
-      padding: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 9px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    #openButton {
-      width: 100%;
-      min-height: 46px;
-      margin-top: 8px;
-      border: 0;
-      border-radius: 9px;
-      background: #4f46e5;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .info {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #6b7280;
-      line-height: 1.4;
-      text-align: center;
-    }
-
-    #formContainer {
-      display: none;
-      margin-top: 12px;
-      padding-bottom: 78px;
-    }
-
-    #googleForm {
-      width: 100%;
-      height: 900px;
-      display: block;
-      border: none;
-      border-radius: 12px;
-      background: #fff;
-    }
-
-    #btnScanAgain {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: min(520px, calc(100vw - 28px));
-      min-height: 54px;
-      z-index: 99999;
-      border: 0;
-      border-radius: 12px;
-      background: #16a34a;
-      color: #fff;
-      font-size: 17px;
-      font-weight: 700;
-      box-shadow: 0 4px 18px rgba(0,0,0,.28);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #btnScanAgain:active {
-      transform: translateX(-50%) scale(.98);
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<title>Quét QR Tờ Lệnh @BinhPo21</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+.wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
+h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-align:center;color:#6b7280;font-size:13px}
+.hidden{display:none!important}.department-title{text-align:center;font-size:17px;font-weight:700;margin:14px 0 10px}
+.department-grid{display:grid;gap:10px}.department-button{width:100%;min-height:58px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:17px;font-weight:700}
+.department-bar{display:flex;gap:8px;align-items:center;margin:8px 0 10px}
+.selected-department{flex:1;margin:0;padding:10px;border-radius:10px;background:#eef2ff;color:#3730a3;text-align:center;font-weight:700}
+.change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
+.camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}
+#video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
+.scan-box{position:absolute;left:50%;top:50%;width:min(72vw,330px);height:min(72vw,330px);transform:translate(-50%,-50%);border:4px solid #fff;border-radius:4px;pointer-events:none}
+.scan-box:before,.scan-box:after{content:"";position:absolute;width:70px;height:70px;border-color:#fff;border-style:solid}
+.scan-box:before{left:-4px;top:-4px;border-width:7px 0 0 7px}.scan-box:after{right:-4px;bottom:-4px;border-width:0 7px 7px 0}
+.status{margin-top:8px;padding:9px;border-radius:9px;background:#f3f4f6;font-size:13px;text-align:center;word-break:break-word}
+.status.ok{background:#ecfdf5;color:#065f46}.status.error{background:#fef2f2;color:#991b1b}
+#imageScanBox{margin-top:10px}#imageInput{display:none}
+#imagePicker{display:block;width:100%;min-height:48px;line-height:48px;text-align:center;border-radius:10px;background:#2563eb;color:#fff;font-size:16px;font-weight:700}
+.manual{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px}.manual-label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
+input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-radius:9px;font-size:16px}
+#openButton{width:100%;min-height:46px;margin-top:8px;border:0;border-radius:9px;background:#4f46e5;color:#fff;font-size:15px;font-weight:600}
+.info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}.formbox{display:none;margin-top:12px;padding-bottom:84px}
+#googleForm{width:100%;height:1100px;border:0;border-radius:12px;background:#fff;display:block}
+#bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:flex;gap:8px}
+#btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
+#btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
+</style>
 </head>
-
 <body>
-  <main class="wrap">
-    <section class="card">
-
-      <h1>📷 Quét QR Tờ Lệnh @BinhPo21</h1>
-      <p class="sub">Quét QR → tự điền Google Form</p>
-
-      <div class="camera" id="cameraBox">
-        <video id="video" playsinline muted></video>
-        <div class="scan-box"></div>
-      </div>
-
-      <div id="status" class="status">
-        Đang tải bộ quét QR...
-      </div>
-
-      <div id="imageScanBox">
-        <input id="imageInput" type="file" accept="image/*">
-        <label id="imagePicker" for="imageInput">
-          🖼️ CHỌN ẢNH ĐỂ QUÉT QR
-        </label>
-      </div>
-
-      <div id="formContainer">
-        <iframe id="googleForm" title="Google Form"></iframe>
-        <button id="btnScanAgain" type="button">
-          🔄 QUÉT TỜ LỆNH TIẾP
-        </button>
-      </div>
-
-      <div class="manual" id="manualBox">
-        <label for="manualCode">Nhập mã QR nếu cần</label>
-        <input
-          id="manualCode"
-          type="text"
-          autocomplete="off"
-          placeholder="Dán chuỗi QR vào đây"
-        >
-        <button id="openButton" type="button">
-          Mở Google Form
-        </button>
-      </div>
-
-      <div class="info">
-        QR gồm 6 giá trị, ngăn cách bằng dấu |.
-      </div>
-
-    </section>
-  </main>
-
-  <script type="module">
-    import {
-      BrowserQRCodeReader
-    } from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
-
-    const FORM_URL =
-      "https://docs.google.com/forms/d/e/1FAIpQLSdGFniU6DwdOeNJ5rbvE7cbEVwHiCKQe8skzRx-4ktXtK5hQQ/viewform";
-
-    const ENTRY_IDS = [
-      "entry.392564381",
-      "entry.682796725",
-      "entry.260788272",
-      "entry.312519866",
-      "entry.2147420635",
-      "entry.697190504"
-    ];
-
-    const video = document.getElementById("video");
-    const cameraBox = document.getElementById("cameraBox");
-    const statusBox = document.getElementById("status");
-    const imageScanBox = document.getElementById("imageScanBox");
-    const imageInput = document.getElementById("imageInput");
-    const formContainer = document.getElementById("formContainer");
-    const googleForm = document.getElementById("googleForm");
-    const btnScanAgain = document.getElementById("btnScanAgain");
-    const manualBox = document.getElementById("manualBox");
-    const manualInput = document.getElementById("manualCode");
-    const openButton = document.getElementById("openButton");
-
-    let reader = null;
-    let controls = null;
-    let daQuet = false;
-
-    function taoLinkForm(chuoiQR) {
-      const parts = String(chuoiQR ?? "").trim().split("|");
-
-      if (parts.length !== ENTRY_IDS.length) {
-        throw new Error(
-          "QR khong dung cau truc: can 6 gia tri, hien co " +
-          parts.length + " gia tri."
-        );
-      }
-
-      const params = new URLSearchParams();
-      params.set("usp", "pp_url");
-
-      for (let i = 0; i < ENTRY_IDS.length; i++) {
-        params.set(ENTRY_IDS[i], parts[i].trim());
-      }
-
-      return FORM_URL + "?" + params.toString();
-    }
-
-    async function dungCamera() {
-      if (controls) {
-        try {
-          controls.stop();
-        } catch (_) {}
-        controls = null;
-      }
-
-      if (reader) {
-        try {
-          reader.reset();
-        } catch (_) {}
-      }
-    }
-
-    async function moGoogleForm(chuoiQR) {
-      try {
-        const url = taoLinkForm(chuoiQR);
-
-        daQuet = true;
-
-        await dungCamera();
-
-        cameraBox.style.display = "none";
-        imageScanBox.style.display = "none";
-        manualBox.style.display = "none";
-
-        statusBox.textContent =
-          "✅ Đã quét. Điền thông tin rồi bấm Gửi.";
-        statusBox.className = "status ok";
-
-        googleForm.src = url + "&embedded=true";
-        formContainer.style.display = "block";
-
-        formContainer.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-      } catch (error) {
-        statusBox.textContent = error.message;
-        statusBox.className = "status error";
-        daQuet = false;
-      }
-    }
-
-    function xuLyMaQuet(text) {
-      if (daQuet) return;
-
-      const value = String(text || "").trim();
-
-      if (value.split("|").length !== 6) return;
-
-      moGoogleForm(value);
-    }
-
-    openButton.addEventListener("click", function () {
-      moGoogleForm(manualInput.value);
-    });
-
-    manualInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        moGoogleForm(manualInput.value);
-      }
-    });
-
-    /*
-      Quet QR tu anh trong album.
-
-      Anh QR cua minh co the rat lon.
-      Vi vay thu nhieu kich thuoc anh:
-      - Anh goc
-      - Anh thu nho 50%
-      - Anh thu nho 25%
-
-      Cach nay giup QR de doc hon voi mot so dien thoai.
-    */
-    imageInput.addEventListener("change", async function () {
-      const file = this.files && this.files[0];
-
-      this.value = "";
-
-      if (!file || daQuet) return;
-
-      try {
-        statusBox.textContent = "🖼️ Đang đọc QR từ ảnh...";
-        statusBox.className = "status";
-
-        const dataUrl = await new Promise((resolve, reject) => {
-          const fr = new FileReader();
-
-          fr.onload = function () {
-            resolve(fr.result);
-          };
-
-          fr.onerror = function () {
-            reject(new Error("Không đọc được file ảnh."));
-          };
-
-          fr.readAsDataURL(file);
-        });
-
-        const img = new Image();
-
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = function () {
-            reject(new Error("Không mở được hình ảnh."));
-          };
-          img.src = dataUrl;
-        });
-
-        const imageReader = new BrowserQRCodeReader();
-
-        let result = null;
-
-        /*
-          Thu nho anh bang Canvas.
-          QR trong anh mau cua anh da duoc kiem tra:
-          kich thuoc 50% de decoder nhan tot hon.
-        */
-        const scales = [1, 0.5, 0.75, 0.35];
-
-        for (const scale of scales) {
-          if (result) break;
-
-          const canvas = document.createElement("canvas");
-
-          const width = Math.max(1, Math.round(img.naturalWidth * scale));
-          const height = Math.max(1, Math.round(img.naturalHeight * scale));
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext("2d", {
-            willReadFrequently: true
-          });
-
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
-
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const testImg = new Image();
-
-          await new Promise((resolve, reject) => {
-            testImg.onload = resolve;
-            testImg.onerror = function () {
-              reject(new Error("Không tạo được ảnh xử lý."));
-            };
-            testImg.src = canvas.toDataURL("image/png");
-          });
-
-          try {
-            result = await imageReader.decodeFromImageElement(testImg);
-          } catch (_) {
-            result = null;
-          }
-        }
-
-        if (!result) {
-          throw new Error("Không tìm thấy QR trong hình.");
-        }
-
-        const text = result.getText();
-
-        if (text.split("|").length !== 6) {
-          throw new Error(
-            "Đã tìm thấy QR nhưng QR không đúng 6 giá trị."
-          );
-        }
-
-        xuLyMaQuet(text);
-
-      } catch (error) {
-        console.error("Lỗi quét ảnh:", error);
-
-        statusBox.textContent =
-          "❌ Không đọc được QR trong hình. Hãy chọn ảnh QR rõ hơn.";
-        statusBox.className = "status error";
-      }
-    });
-
-    btnScanAgain.addEventListener("click", async function () {
-      googleForm.src = "";
-      formContainer.style.display = "none";
-
-      cameraBox.style.display = "block";
-      imageScanBox.style.display = "block";
-      manualBox.style.display = "block";
-
-      daQuet = false;
-
-      statusBox.textContent = "📷 Đang mở camera...";
-      statusBox.className = "status";
-
-      await khoiDong();
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    });
-
-    async function khoiDong() {
-      try {
-        if (!window.isSecureContext) {
-          throw new Error("Trang phai chay bang HTTPS.");
-        }
-
-        statusBox.textContent = "Đang xin quyền Camera...";
-
-        reader = new BrowserQRCodeReader();
-
-        controls = await reader.decodeFromConstraints(
-          {
-            audio: false,
-            video: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1920 },
-              height: { ideal: 1080 }
-            }
-          },
-          video,
-          function (result, error) {
-            if (result) {
-              xuLyMaQuet(result.getText());
-            }
-          }
-        );
-
-        statusBox.textContent =
-          "Sẵn sàng - đưa QR vào giữa khung.";
-        statusBox.className = "status";
-
-      } catch (error) {
-        console.error(error);
-
-        statusBox.textContent =
-          "Không khởi động được Camera: " +
-          (error.message || error);
-
-        statusBox.className = "status error";
-      }
-    }
-
-    khoiDong();
-  </script>
+<main class="wrap"><section class="card">
+<h1>📷 Quét QR Tờ Lệnh @BinhPo21</h1>
+<p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p>
+
+<div id="departmentScreen">
+<div class="department-title">Chọn bộ phận</div>
+<div class="department-grid">
+<button class="department-button" data-department="In">🖨️ IN</button>
+<button class="department-button" data-department="Bế">✂️ BẾ</button>
+<button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button>
+<button class="department-button" data-department="Kho">🏭 KHO</button>
+</div></div>
+
+<div id="scannerScreen" class="hidden">
+<div class="department-bar">
+<div id="selectedDepartment" class="selected-department"></div>
+<button id="changeDepartment" class="change-department" type="button">🔄 ĐỔI BỘ PHẬN</button>
+</div>
+<div class="camera id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div>
+<div id="status" class="status">Đang tải bộ quét QR...</div>
+<div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ CHỌN ẢNH ĐỂ QUÉT QR</label></div>
+<div class="manual" id="manualBox">
+<label class="manual-label" for="manualCode">Nhập mã QR nếu cần</label>
+<input id="manualCode" type="text" autocomplete="off" placeholder="Dán chuỗi QR vào đây">
+<button id="openButton" type="button">Mở Google Form</button>
+</div>
+<div class="info">QR gồm 5 giá trị, ngăn cách bằng dấu |.</div>
+</div>
+
+<div id="formContainer" class="formbox">
+<iframe id="googleForm" title="Google Form"></iframe>
+<div id="bottomButtons">
+<button id="btnScanAgain" type="button">🔄 QUÉT TỜ LỆNH TIẾP</button>
+<button id="btnHome" type="button">🏠 ĐỔI BỘ PHẬN</button>
+</div></div>
+</section></main>
+
+<script type="module">
+import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
+
+const DEPARTMENTS={
+"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform",
+"Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform",
+"Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform",
+"Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform"
+};
+
+const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
+const departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen");
+const selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox");
+const video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox");
+const imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode");
+const openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm");
+const btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
+let reader=null,controls=null,daQuet=false,boPhanDangChon=null;
+
+function taoLinkForm(chuoiQR){
+ if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
+ const parts=String(chuoiQR??"").trim().split("|");
+ if(parts.length!==5)throw new Error("QR không đúng cấu trúc: cần 5 giá trị, hiện có "+parts.length+" giá trị.");
+ const p=new URLSearchParams();p.set("usp","pp_url");
+ ENTRY_IDS.forEach((id,i)=>p.set(id,parts[i].trim()));
+ return DEPARTMENTS[boPhanDangChon]+"?"+p.toString();
+}
+async function dungCamera(){
+ if(controls){try{controls.stop()}catch(_){}controls=null}
+ if(reader){try{reader.reset()}catch(_){}}
+}
+function xuLyMaQuet(text){if(daQuet)return;const value=String(text||"").trim();if(value.split("|").length!==5)return;moGoogleForm(value)}
+async function moGoogleForm(chuoiQR){
+ try{
+  const url=taoLinkForm(chuoiQR);daQuet=true;await dungCamera();
+  cameraBox.classList.add("hidden");imageScanBox.classList.add("hidden");manualBox.classList.add("hidden");
+  statusBox.textContent="✅ Đã quét. Điền thông tin rồi bấm Gửi.";statusBox.className="status ok";
+  googleForm.src=url+"&embedded=true";formContainer.style.display="block";
+  formContainer.scrollIntoView({behavior:"smooth",block:"start"});
+ }catch(e){statusBox.textContent=e.message;statusBox.className="status error";daQuet=false}
+}
+async function khoiDong(){
+ try{
+  await dungCamera();
+  if(!window.isSecureContext)throw new Error("Trang phải chạy bằng HTTPS.");
+  statusBox.textContent="Đang xin quyền Camera...";statusBox.className="status";
+  reader=new BrowserQRCodeReader();
+  controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}},video,(result)=>{if(result)xuLyMaQuet(result.getText())});
+  statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";
+ }catch(e){console.error(e);statusBox.textContent="Không khởi động được Camera: "+(e.message||e);statusBox.className="status error"}
+}
+
+imageInput.addEventListener("change",async function(){
+ const file=this.files&&this.files[0];this.value="";if(!file||daQuet)return;
+ try{
+  statusBox.textContent="🖼️ Đang đọc QR từ ảnh...";statusBox.className="status";
+  const dataUrl=await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(new Error("Không đọc được file ảnh."));fr.readAsDataURL(file)});
+  const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error("Không mở được hình ảnh."));img.src=dataUrl});
+  const r=new BrowserQRCodeReader();let result=null;
+  for(const scale of [1,.75,.5,.35]){
+   if(result)break;
+   const canvas=document.createElement("canvas"),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+   canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(img,0,0,w,h);
+   const testImg=new Image();await new Promise((resolve,reject)=>{testImg.onload=resolve;testImg.onerror=reject;testImg.src=canvas.toDataURL("image/png")});
+   try{result=await r.decodeFromImageElement(testImg)}catch(_){result=null}
+  }
+  if(!result)throw new Error("Không tìm thấy QR trong hình.");
+  const text=result.getText();if(text.split("|").length!==5)throw new Error("Đã tìm thấy QR nhưng QR không đúng 5 giá trị.");
+  xuLyMaQuet(text);
+ }catch(e){console.error(e);statusBox.textContent="❌ Không đọc được QR trong hình. Hãy chọn ảnh QR rõ hơn.";statusBox.className="status error"}
+});
+
+openButton.addEventListener("click",()=>moGoogleForm(manualInput.value));
+manualInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();moGoogleForm(manualInput.value)}});
+
+btnScanAgain.addEventListener("click",async()=>{
+ googleForm.src="";formContainer.style.display="none";cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");
+ daQuet=false;statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";await khoiDong();window.scrollTo({top:0,behavior:"smooth"});
+});
+
+changeDepartment.addEventListener("click",async()=>{
+ // Dung camera va tai lai trang de chon lai bo phan.
+ await dungCamera();
+ window.location.reload();
+});
+
+btnHome.addEventListener("click",async()=>{
+ // Dung camera truoc khi tai lai trang.
+ await dungCamera();
+
+ // Tai lai trang de quay ve man hinh chon bo phan tu dau.
+ window.location.reload();
+});
+
+document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{
+ boPhanDangChon=button.dataset.department;selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
+ departmentScreen.classList.add("hidden");scannerScreen.classList.remove("hidden");daQuet=false;
+ statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";window.scrollTo({top:0,behavior:"smooth"});await khoiDong();
+}));
+</script>
 </body>
 </html>
