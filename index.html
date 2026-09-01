@@ -170,7 +170,7 @@ async function moGoogleForm(chuoiQR){
  }catch(e){statusBox.textContent=e.message;statusBox.className="status error";daQuet=false}
 }
 
-function donDepKhiRoiTrang(){
+function dungStreamCamera(){
  try{
   if(videoTrack){
    try{
@@ -196,11 +196,35 @@ function donDepKhiRoiTrang(){
 
   videoTrack=null;
   flashDangBat=false;
+  if(flashButton){
+   flashButton.classList.remove("on");
+   flashButton.textContent="🔦 BẬT FLASH";
+  }
  }catch(_){}
 }
 
-window.addEventListener("pagehide",donDepKhiRoiTrang);
-window.addEventListener("beforeunload",donDepKhiRoiTrang);
+// Khi chuyen sang app khac/khoa man hinh, dung Camera ngay.
+document.addEventListener("visibilitychange",async()=>{
+ if(document.visibilityState==="hidden"){
+  dungStreamCamera();
+  return;
+ }
+
+ // Khi quay lai web, mo lai Camera.
+ // Quyen Camera van do trinh duyet luu, nen thuong khong hoi lai.
+ if(document.visibilityState==="visible"){
+  const dangQuet = !scannerScreen.classList.contains("hidden");
+  if(dangQuet && !daQuet){
+   try{
+    await khoiDong();
+   }catch(_){}
+  }
+ }
+});
+
+// Truong hop dieu huong/thoat trang.
+window.addEventListener("pagehide",dungStreamCamera);
+window.addEventListener("beforeunload",dungStreamCamera);
 
 async function khoiDong(){
  try{
