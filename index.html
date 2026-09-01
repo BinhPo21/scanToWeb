@@ -17,6 +17,9 @@ h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-ali
 .change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
 .camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}
 #video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
+.camera-controls{display:flex;gap:8px;margin-top:8px}
+.flash-button{flex:1;min-height:44px;border:0;border-radius:10px;background:#374151;color:#fff;font-size:14px;font-weight:700}
+.flash-button.on{background:#f59e0b;color:#111827}
 .scan-box{position:absolute;left:50%;top:50%;width:min(72vw,330px);height:min(72vw,330px);transform:translate(-50%,-50%);border:4px solid #fff;border-radius:4px;pointer-events:none}
 .scan-box:before,.scan-box:after{content:"";position:absolute;width:70px;height:70px;border-color:#fff;border-style:solid}
 .scan-box:before{left:-4px;top:-4px;border-width:7px 0 0 7px}.scan-box:after{right:-4px;bottom:-4px;border-width:0 7px 7px 0}
@@ -54,6 +57,9 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 <button id="changeDepartment" class="change-department" type="button">🔄 ĐỔI BỘ PHẬN</button>
 </div>
 <div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div>
+<div class="camera-controls">
+<button id="flashButton" class="flash-button" type="button">🔦 BẬT FLASH</button>
+</div>
 <div id="status" class="status">Đang tải bộ quét QR...</div>
 <div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ CHỌN ẢNH ĐỂ QUÉT QR</label></div>
 <div class="manual" id="manualBox">
@@ -85,11 +91,14 @@ const DEPARTMENTS={
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen");
 const selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox");
+const flashButton=document.getElementById("flashButton");
 const video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox");
 const imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode");
 const openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm");
 const btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
 let reader=null,controls=null,daQuet=false,boPhanDangChon=null;
+let videoTrack=null;
+let flashDangBat=false;
 
 function taoLinkForm(chuoiQR){
  if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
@@ -100,6 +109,13 @@ function taoLinkForm(chuoiQR){
  return DEPARTMENTS[boPhanDangChon]+"?"+p.toString();
 }
 async function dungCamera(){
+ if(videoTrack){
+  try{await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}
+  videoTrack=null;
+ }
+ flashDangBat=false;
+ flashButton.classList.remove("on");
+ flashButton.textContent="🔦 BẬT FLASH";
  if(controls){
   try{controls.stop()}catch(_){}
   controls=null;
@@ -122,6 +138,15 @@ async function khoiDong(){
   statusBox.textContent="Đang xin quyền Camera...";statusBox.className="status";
   reader=new BrowserQRCodeReader();
   controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}},video,(result)=>{if(result)xuLyMaQuet(result.getText())});
+
+  // Lay track camera de dieu khien den Flash neu thiet bi/trinh duyet ho tro.
+  const stream=video.srcObject;
+  videoTrack=stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+  const capabilities=videoTrack && videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+  flashButton.disabled=!capabilities.torch;
+  flashButton.style.opacity=capabilities.torch ? "1" : ".55";
+  flashButton.textContent=capabilities.torch ? "🔦 BẬT FLASH" : "🔦 FLASH KHÔNG HỖ TRỢ";
+
   statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";
  }catch(e){console.error(e);statusBox.textContent="Không khởi động được Camera: "+(e.message||e);statusBox.className="status error"}
 }
@@ -152,6 +177,32 @@ manualInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault(
 btnScanAgain.addEventListener("click",async()=>{
  googleForm.src="";formContainer.style.display="none";cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");
  daQuet=false;statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";await khoiDong();window.scrollTo({top:0,behavior:"smooth"});
+});
+
+flashButton.addEventListener("click",async()=>{
+ if(!videoTrack || !videoTrack.getCapabilities){
+  statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";
+  statusBox.className="status error";
+  return;
+ }
+ const capabilities=videoTrack.getCapabilities();
+ if(!capabilities.torch){
+  statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";
+  statusBox.className="status error";
+  return;
+ }
+ try{
+  flashDangBat=!flashDangBat;
+  await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});
+  flashButton.classList.toggle("on",flashDangBat);
+  flashButton.textContent=flashDangBat ? "💡 TẮT FLASH" : "🔦 BẬT FLASH";
+ }catch(error){
+  flashDangBat=false;
+  flashButton.classList.remove("on");
+  flashButton.textContent="🔦 BẬT FLASH";
+  statusBox.textContent="⚠️ Không thể điều khiển Flash trên thiết bị này.";
+  statusBox.className="status error";
+ }
 });
 
 changeDepartment.addEventListener("click",function(){
