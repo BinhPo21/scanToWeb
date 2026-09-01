@@ -128,6 +128,19 @@ function taoLinkForm(chuoiQR){
  ENTRY_IDS.forEach((id,i)=>p.set(id,parts[i].trim()));
  return DEPARTMENTS[boPhanDangChon]+"?"+p.toString();
 }
+async function tatFlash(){
+ if(videoTrack){
+  try{
+   if(videoTrack.getCapabilities && videoTrack.getCapabilities().torch){
+    await videoTrack.applyConstraints({advanced:[{torch:false}]});
+   }
+  }catch(_){}
+ }
+ flashDangBat=false;
+ flashButton.classList.remove("on");
+ flashButton.textContent="🔦 BẬT FLASH";
+}
+
 async function dungCamera(){
  if(videoTrack){
   try{await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}
@@ -145,7 +158,7 @@ async function dungCamera(){
 function xuLyMaQuet(text){if(daQuet)return;const value=String(text||"").trim();if(value.split("|").length!==5)return;moGoogleForm(value)}
 async function moGoogleForm(chuoiQR){
  try{
-  const url=taoLinkForm(chuoiQR);daQuet=true;
+  const url=taoLinkForm(chuoiQR);daQuet=true;await tatFlash();
   cameraBox.classList.add("hidden");imageScanBox.classList.add("hidden");manualBox.classList.add("hidden");
   scannerScreen.classList.add("hidden");
   appHeader.classList.add("active");
@@ -156,6 +169,39 @@ async function moGoogleForm(chuoiQR){
   formContainer.scrollIntoView({behavior:"smooth",block:"start"});
  }catch(e){statusBox.textContent=e.message;statusBox.className="status error";daQuet=false}
 }
+
+function donDepKhiRoiTrang(){
+ try{
+  if(videoTrack){
+   try{
+    if(videoTrack.getCapabilities && videoTrack.getCapabilities().torch){
+     videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{});
+    }
+   }catch(_){}
+  }
+
+  const stream=video.srcObject;
+  if(stream && stream.getTracks){
+   stream.getTracks().forEach(track=>{
+    try{track.stop();}catch(_){}
+   });
+  }
+
+  video.srcObject=null;
+
+  if(controls){
+   try{controls.stop();}catch(_){}
+   controls=null;
+  }
+
+  videoTrack=null;
+  flashDangBat=false;
+ }catch(_){}
+}
+
+window.addEventListener("pagehide",donDepKhiRoiTrang);
+window.addEventListener("beforeunload",donDepKhiRoiTrang);
+
 async function khoiDong(){
  try{
   if(!window.isSecureContext)throw new Error("Trang phải chạy bằng HTTPS.");
