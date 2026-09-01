@@ -10,6 +10,17 @@
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
 h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-align:center;color:#6b7280;font-size:13px}
+.card.home-mode{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:min(560px,calc(100vw - 24px));
+max-height:calc(100dvh - 24px);
+overflow:auto;
+margin:0;
+}
+body.home-mode{overflow:hidden}
 .hidden{display:none!important}.department-title{text-align:center;font-size:17px;font-weight:700;margin:14px 0 10px}
 .department-grid{display:grid;gap:10px}.department-button{width:100%;min-height:58px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:17px;font-weight:700}
 .app-header.active{
@@ -54,8 +65,8 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
 </style>
 </head>
-<body>
-<main class="wrap"><section class="card">
+<body class="home-mode">
+<main class="wrap"><section class="card home-mode">
 <div id="appHeader" class="app-header">
 <h1>📷 Quét QR Tờ Lệnh 3/2</h1>
 <p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p>
@@ -373,7 +384,8 @@ btnHome.addEventListener("click",async()=>{
 });
 
 document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{
- boPhanDangChon=button.dataset.department;selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
+ boPhanDangChon=button.dataset.department;
+ document.body.classList.remove("home-mode"); document.querySelector(".card").classList.remove("home-mode");selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
  appHeader.classList.add("active");departmentBar.classList.remove("hidden");
  departmentScreen.classList.add("hidden");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");
  formContainer.classList.remove("active-space");daQuet=false;
