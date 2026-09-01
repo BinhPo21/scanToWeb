@@ -6,11 +6,9 @@
   <meta name="theme-color" content="#4f46e5">
   <title>Quét QR Tờ Lệnh @BinhPo21</title>
 
-  <!-- Dung jsDelivr thay cho unpkg de tranh mot so bo chan CDN. -->
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -18,50 +16,86 @@
       background: #f3f4f6;
       color: #111827;
     }
+
     .wrap {
       width: min(560px, 100%);
       margin: 0 auto;
       padding: 12px;
     }
+
     .card {
       background: #fff;
       border-radius: 16px;
       padding: 14px;
       box-shadow: 0 3px 14px rgba(0,0,0,.08);
     }
+
     h1 {
       margin: 0 0 5px;
       font-size: 22px;
       text-align: center;
     }
+
     .sub {
       margin: 0 0 12px;
       text-align: center;
       color: #6b7280;
       font-size: 13px;
     }
-    #reader {
+
+    /* Camera lon, gap doi ban truoc */
+    .camera {
       width: 100%;
-      height: 220px;
+      height: 440px;
+      position: relative;
       overflow: hidden;
       border-radius: 12px;
       background: #111;
-      position: relative;
     }
-    #reader video {
-      width: 100% !important;
-      height: 220px !important;
-      max-height: 220px !important;
-      object-fit: cover !important;
-      border-radius: 12px;
+
+    #video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      background: #111;
     }
-    #reader__scan_region {
-      min-height: 0 !important;
-      height: 220px !important;
+
+    /* Khung huong dan quet QR */
+    .scan-box {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(72vw, 330px);
+      height: min(72vw, 330px);
+      transform: translate(-50%, -50%);
+      border: 4px solid rgba(255,255,255,.95);
+      border-radius: 4px;
+      pointer-events: none;
     }
-    #reader__scan_region img {
-      display: none !important;
+
+    .scan-box::before,
+    .scan-box::after {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-color: #fff;
+      border-style: solid;
     }
+
+    .scan-box::before {
+      left: -4px;
+      top: -4px;
+      border-width: 7px 0 0 7px;
+    }
+
+    .scan-box::after {
+      right: -4px;
+      bottom: -4px;
+      border-width: 0 7px 7px 0;
+    }
+
     .status {
       margin-top: 8px;
       padding: 9px;
@@ -71,25 +105,30 @@
       text-align: center;
       word-break: break-word;
     }
+
     .status.ok {
       background: #ecfdf5;
       color: #065f46;
     }
+
     .status.error {
       background: #fef2f2;
       color: #991b1b;
     }
+
     .manual {
       margin-top: 10px;
       border-top: 1px solid #e5e7eb;
       padding-top: 10px;
     }
+
     label {
       display: block;
       margin-bottom: 6px;
       font-weight: 600;
       font-size: 13px;
     }
+
     input {
       width: 100%;
       min-height: 46px;
@@ -99,6 +138,7 @@
       font-size: 16px;
       outline: none;
     }
+
     button {
       width: 100%;
       min-height: 46px;
@@ -110,6 +150,7 @@
       font-size: 15px;
       font-weight: 600;
     }
+
     .info {
       margin-top: 10px;
       font-size: 11px;
@@ -126,10 +167,13 @@
       <h1>📷Quét QR Tờ Lệnh @BinhPo21</h1>
       <p class="sub">Quét QR → tự điền Google Form</p>
 
-      <div id="reader"></div>
+      <div class="camera">
+        <video id="video" playsinline muted></video>
+        <div class="scan-box"></div>
+      </div>
 
       <div id="status" class="status">
-        Đang khởi động camera...
+        Đang tải bộ quét QR...
       </div>
 
       <div class="manual">
@@ -140,18 +184,17 @@
       </div>
 
       <div class="info">
-        QR có 6 giá trị, ngăn cách bằng dấu |.
+        QR gồm 6 giá trị, ngăn cách bằng dấu |.
       </div>
     </section>
   </main>
 
-<script>
-(function () {
-  "use strict";
-
-  // ============================================================
-  // CẤU HÌNH GOOGLE FORM
-  // ============================================================
+<script type="module">
+  // ZXing Browser la bo giai ma QR rieng, thay cho html5-qrcode.
+  // Ban 0.2.1 hien co tren jsDelivr.
+  import {
+    BrowserQRCodeReader
+  } from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
 
   const FORM_URL =
     "https://docs.google.com/forms/d/e/1FAIpQLSdGFniU6DwdOeNJ5rbvE7cbEVwHiCKQe8skzRx-4ktXtK5hQQ/viewform";
@@ -165,12 +208,14 @@
     "entry.697190504"    // So Luong Yeu Cau
   ];
 
+  const video = document.getElementById("video");
   const statusBox = document.getElementById("status");
   const manualInput = document.getElementById("manualCode");
   const openButton = document.getElementById("openButton");
 
   let daQuet = false;
-  let scanner = null;
+  let controls = null;
+  let reader = null;
 
   function taoLinkForm(chuoiQR) {
     const parts = String(chuoiQR ?? "").trim().split("|");
@@ -182,7 +227,6 @@
       );
     }
 
-    // URLSearchParams tu dong ma hoa dau phay, dau cach, tieng Viet...
     const params = new URLSearchParams();
     params.set("usp", "pp_url");
 
@@ -201,7 +245,10 @@
         "Da quet du 6 thong tin - dang mo Google Form...";
       statusBox.className = "status ok";
 
-      // Chuyen ngay trong tab hien tai.
+      if (controls) {
+        try { controls.stop(); } catch (_) {}
+      }
+
       window.location.replace(url);
     } catch (error) {
       statusBox.textContent = error.message;
@@ -210,18 +257,18 @@
     }
   }
 
-  function xuLyMaQuet(ma) {
+  function xuLyMaQuet(text) {
     if (daQuet) return;
-    daQuet = true;
 
-    if (scanner && scanner.isScanning) {
-      scanner.stop().catch(function () {});
+    const value = String(text || "").trim();
+
+    // Chi chap nhan dung cau truc 6 phan.
+    if (value.split("|").length !== 6) {
+      return;
     }
 
-    // Chuyen trang ngay sau khi nhan ma.
-    window.setTimeout(function () {
-      moGoogleForm(ma);
-    }, 30);
+    daQuet = true;
+    moGoogleForm(value);
   }
 
   openButton.addEventListener("click", function () {
@@ -235,96 +282,48 @@
     }
   });
 
-  // ============================================================
-  // KHỞI ĐỘNG CAMERA
-  // ============================================================
-
-  function baoLoiCamera(message) {
-    statusBox.textContent = message;
-    statusBox.className = "status error";
-  }
-
-  function khoiDongCamera() {
-    if (typeof Html5Qrcode === "undefined") {
-      baoLoiCamera(
-        "Khong tai duoc thu vien quet QR. Hay tai lai trang."
-      );
-      return;
-    }
-
-    if (!window.isSecureContext) {
-      baoLoiCamera(
-        "Camera can HTTPS. Hay mo bang link GitHub Pages https://..."
-      );
-      return;
-    }
-
-    scanner = new Html5Qrcode("reader", {
-      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      useBarCodeDetectorIfSupported: false,
-      verbose: false
-    });
-
-    // Cấu hình gọn, không ép videoConstraints để tránh xung đột
-    // với một số Chrome/Android.
-    const config = {
-      fps: 10,
-      qrbox: function (viewfinderWidth, viewfinderHeight) {
-        const size = Math.min(
-          viewfinderWidth * 0.78,
-          viewfinderHeight * 0.68,
-          320
-        );
-
-        return {
-          width: Math.floor(size),
-          height: Math.floor(size)
-        };
-      },
-      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-      useBarCodeDetectorIfSupported: false,
-      disableFlip: true
-    };
-
-    statusBox.textContent = "Đang xin quyền Camera...";
-
-    scanner.start(
-      { facingMode: "environment" },
-      config,
-      function (decodedText) {
-        xuLyMaQuet(decodedText);
-      },
-      function () {
-        // Bo qua loi cua tung khung hinh.
+  async function khoiDong() {
+    try {
+      if (!window.isSecureContext) {
+        throw new Error("Trang phai chay bang HTTPS.");
       }
-    ).then(function () {
+
+      statusBox.textContent = "Đang xin quyền Camera...";
+
+      reader = new BrowserQRCodeReader();
+
+      // undefined = tu chon camera mac dinh / camera sau.
+      controls = await reader.decodeFromConstraints(
+        {
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        },
+        video,
+        function (result, error) {
+          if (result) {
+            xuLyMaQuet(result.getText());
+          }
+        }
+      );
+
       statusBox.textContent =
-        "Sẵn sàn để quét!";
+        "Sẵn sàng - đưa QR vào giữa khung, cách khoảng 15–30 cm.";
       statusBox.className = "status";
-    }).catch(function (error) {
+
+    } catch (error) {
       console.error(error);
 
-      if (error && String(error).toLowerCase().includes("permission")) {
-        baoLoiCamera(
-          "Camera bị Từ Chối Quyền"
-        );
-      } else {
-        baoLoiCamera(
-          "Không Mở Được Camera"
-        );
-      }
-    });
+      statusBox.textContent =
+        "Không khởi động được Camera: " + (error.message || error);
+      statusBox.className = "status error";
+    }
   }
 
-  // Cho HTML load xong roi moi khoi dong scanner.
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", khoiDongCamera, {
-      once: true
-    });
-  } else {
-    khoiDongCamera();
-  }
-})();
+  khoiDong();
 </script>
 </body>
 </html>
