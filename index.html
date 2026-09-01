@@ -41,15 +41,33 @@
     }
     #reader {
       width: 100%;
+      height: 280px;
       overflow: hidden;
       border-radius: 12px;
       background: #111;
+      position: relative;
     }
+
+    /* Camera chi hien mot khung ngang gon, phu hop Barcode CODE 128 */
     #reader video {
+      width: 100% !important;
+      height: 280px !important;
+      max-height: 280px !important;
+      object-fit: cover !important;
       border-radius: 12px;
     }
+
+    /* Giu khung quet nam gon trong vung camera */
+    #reader__scan_region {
+      min-height: 0 !important;
+      height: 280px !important;
+    }
+
+    #reader__scan_region img {
+      display: none !important;
+    }
     .status {
-      margin-top: 10px;
+      margin-top: 8px;
       padding: 9px;
       border-radius: 9px;
       background: #f3f4f6;
@@ -66,7 +84,7 @@
       color: #991b1b;
     }
     .manual {
-      margin-top: 12px;
+      margin-top: 10px;
       border-top: 1px solid #e5e7eb;
       padding-top: 12px;
     }
