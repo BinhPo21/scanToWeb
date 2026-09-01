@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#4f46e5">
   <title>Quét mã sản phẩm</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Dung jsDelivr thay cho unpkg de tranh mot so bo chan CDN. -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -138,12 +140,15 @@
       </div>
 
       <div class="info">
-        QR phải có đúng 6 giá trị, ngăn cách bằng dấu |.
+        QR có 6 giá trị, ngăn cách bằng dấu |.
       </div>
     </section>
   </main>
 
 <script>
+(function () {
+  "use strict";
+
   // ============================================================
   // CẤU HÌNH GOOGLE FORM
   // ============================================================
@@ -151,35 +156,33 @@
   const FORM_URL =
     "https://docs.google.com/forms/d/e/1FAIpQLSdGFniU6DwdOeNJ5rbvE7cbEVwHiCKQe8skzRx-4ktXtK5hQQ/viewform";
 
-  // Thứ tự dữ liệu trong QR:
-  // 1. Khách Hàng       -> entry.392564381
-  // 2. Đơn Hàng         -> entry.682796725
-  // 3. Mã Lệnh          -> entry.260788272
-  // 4. Quy Cách SX      -> entry.632173225
-  // 5. Màu Sắc          -> entry.2147420635
-  // 6. Số Lượng YC      -> entry.697190504
-
   const ENTRY_IDS = [
-    "entry.392564381",
-    "entry.682796725",
-    "entry.260788272",
-    "entry.632173225",
-    "entry.2147420635",
-    "entry.697190504"
+    "entry.392564381",   // Khach Hang
+    "entry.682796725",   // Don Hang
+    "entry.260788272",   // Ma Lenh
+    "entry.632173225",   // Quy Cach San Xuat
+    "entry.2147420635",  // Mau Sac
+    "entry.697190504"    // So Luong Yeu Cau
   ];
 
+  const statusBox = document.getElementById("status");
+  const manualInput = document.getElementById("manualCode");
+  const openButton = document.getElementById("openButton");
+
   let daQuet = false;
+  let scanner = null;
 
   function taoLinkForm(chuoiQR) {
-    const parts = String(chuoiQR ?? "").split("|");
+    const parts = String(chuoiQR ?? "").trim().split("|");
 
     if (parts.length !== ENTRY_IDS.length) {
       throw new Error(
-        "QR không đúng cấu trúc. Cần 6 giá trị, nhưng nhận được " +
-        parts.length + " giá trị."
+        "QR khong dung cau truc: can 6 gia tri, hien co " +
+        parts.length + " gia tri."
       );
     }
 
+    // URLSearchParams tu dong ma hoa dau phay, dau cach, tieng Viet...
     const params = new URLSearchParams();
     params.set("usp", "pp_url");
 
@@ -195,9 +198,10 @@
       const url = taoLinkForm(chuoiQR);
 
       statusBox.textContent =
-        "Đã quét đủ 6 thông tin — đang mở Form...";
+        "Da quet du 6 thong tin - dang mo Google Form...";
       statusBox.className = "status ok";
 
+      // Chuyen ngay trong tab hien tai.
       window.location.replace(url);
     } catch (error) {
       statusBox.textContent = error.message;
@@ -210,13 +214,14 @@
     if (daQuet) return;
     daQuet = true;
 
-    if (window.scanner && window.scanner.isScanning) {
-      window.scanner.stop().catch(() => {});
+    if (scanner && scanner.isScanning) {
+      scanner.stop().catch(function () {});
     }
 
-    setTimeout(function () {
+    // Chuyen trang ngay sau khi nhan ma.
+    window.setTimeout(function () {
       moGoogleForm(ma);
-    }, 60);
+    }, 30);
   }
 
   openButton.addEventListener("click", function () {
@@ -230,74 +235,97 @@
     }
   });
 
-  const statusBox = document.getElementById("status");
-  const manualInput = document.getElementById("manualCode");
-
   // ============================================================
-  // CAMERA - CHỈ QUÉT QR CODE
+  // KHỞI ĐỘNG CAMERA
   // ============================================================
 
-  if (!window.Html5Qrcode) {
-    statusBox.textContent =
-      "Không tải được thư viện quét QR.";
+  function baoLoiCamera(message) {
+    statusBox.textContent = message;
     statusBox.className = "status error";
-  } else {
-    window.scanner = new Html5Qrcode("reader", {
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.QR_CODE
-      ],
+  }
+
+  function khoiDongCamera() {
+    if (typeof Html5Qrcode === "undefined") {
+      baoLoiCamera(
+        "Khong tai duoc thu vien quet QR. Hay tai lai trang."
+      );
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      baoLoiCamera(
+        "Camera can HTTPS. Hay mo bang link GitHub Pages https://..."
+      );
+      return;
+    }
+
+    scanner = new Html5Qrcode("reader", {
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
       useBarCodeDetectorIfSupported: true,
       verbose: false
     });
 
+    // Cấu hình gọn, không ép videoConstraints để tránh xung đột
+    // với một số Chrome/Android.
     const config = {
-      fps: 15,
+      fps: 12,
+      qrbox: function (viewfinderWidth, viewfinderHeight) {
+        const size = Math.min(
+          viewfinderWidth * 0.72,
+          viewfinderHeight * 0.78,
+          210
+        );
 
-      qrbox: function(viewfinderWidth, viewfinderHeight) {
-        const size = Math.min(viewfinderWidth * 0.70, 210);
         return {
           width: Math.floor(size),
           height: Math.floor(size)
         };
       },
-
       aspectRatio: 16 / 9,
-
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.QR_CODE
-      ],
-
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
       useBarCodeDetectorIfSupported: true,
-      disableFlip: true,
-
-      videoConstraints: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30, max: 30 }
-      }
+      disableFlip: true
     };
+
+    statusBox.textContent = "Đang xin quyền Camera...";
 
     scanner.start(
       { facingMode: "environment" },
       config,
-      function(decodedText) {
+      function (decodedText) {
         xuLyMaQuet(decodedText);
       },
-      function() {
-        // Bỏ qua lỗi của từng khung hình.
+      function () {
+        // Bo qua loi cua tung khung hinh.
       }
-    ).then(function() {
+    ).then(function () {
       statusBox.textContent =
-        "Sẵn sàng — đưa QR vào giữa khung.";
+        "San sang - dua QR vao giua khung.";
       statusBox.className = "status";
-    }).catch(function(error) {
-      statusBox.textContent =
-        "Không mở được Camera. Hãy cấp quyền Camera cho trình duyệt.";
-      statusBox.className = "status error";
+    }).catch(function (error) {
       console.error(error);
+
+      if (error && String(error).toLowerCase().includes("permission")) {
+        baoLoiCamera(
+          "Camera bi tu choi. Vao quyen cua Chrome → Camera → Cho phep."
+        );
+      } else {
+        baoLoiCamera(
+          "Khong khoi dong duoc Camera. Kiem tra quyen Camera cua Chrome."
+        );
+      }
     });
   }
+
+  // Cho HTML load xong roi moi khoi dong scanner.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", khoiDongCamera, {
+      once: true
+    });
+  } else {
+    khoiDongCamera();
+  }
+})();
 </script>
 </body>
 </html>
