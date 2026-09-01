@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <title>Quét mã đơn hàng</title>
+
+  <!-- Thư viện quét Barcode chạy trực tiếp trên trình duyệt -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    .wrap {
+      width: min(560px, 100%);
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      text-align: center;
+    }
+    .sub {
+      margin: 0 0 18px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    #reader {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #111;
+    }
+    #reader video {
+      border-radius: 14px;
+    }
+    .status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      font-size: 14px;
+      text-align: center;
+      word-break: break-word;
+    }
+    .status.ok {
+      background: #ecfdf5;
+      color: #065f46;
+    }
+    .status.error {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+    .manual {
+      margin-top: 18px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #4f46e5;
+    }
+    button {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    button:active {
+      transform: scale(.99);
+    }
+    .info {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>📷 Quét mã đơn hàng</h1>
+      <p class="sub">Quét Barcode → tự mở Google Form</p>
+
+      <div id="reader"></div>
+
+      <div id="status" class="status">
+        Đang chuẩn bị camera...
+      </div>
+
+      <div class="manual">
+        <label for="manualCode">Hoặc nhập / dùng máy quét Barcode</label>
+        <input id="manualCode" type="text" autocomplete="off"
+               placeholder="Đặt con trỏ vào đây rồi quét mã">
+        <button id="openButton" type="button">Mở Google Form</button>
+      </div>
+
+      <div class="info">
+        Mã Barcode sẽ được đưa vào ô Mã đơn hàng của Google Form.
+        Trang này không lưu mã lên máy chủ.
+      </div>
+    </section>
+  </main>
+
+<script>
+  // ============================================================
+  // CẤU HÌNH GOOGLE FORM
+  // ============================================================
+
+  // Link Form của anh.
+  const FORM_URL =
+    "https://docs.google.com/forms/d/e/1FAIpQLSfI5TyKALA7hhb6UwHx4-GvgxRbC1-mx32z7PcvEk1CWJTpRg/viewform";
+
+  // ID của ô Mã đơn hàng.
+  const ENTRY_ID = "entry.850710254";
+
+
+  // ============================================================
+  // KHÔNG CẦN SỬA PHẦN DƯỚI
+  // ============================================================
+
+  const statusBox = document.getElementById("status");
+  const manualInput = document.getElementById("manualCode");
+  const openButton = document.getElementById("openButton");
+
+  let daQuet = false;
+
+  function moGoogleForm(maDonHang) {
+    maDonHang = String(maDonHang ?? "").trim();
+
+    if (!maDonHang) {
+      statusBox.textContent = "Chưa có mã đơn hàng.";
+      statusBox.className = "status error";
+      return;
+    }
+
+    // encodeURIComponent giúp mã có ký tự đặc biệt vẫn an toàn trong URL.
+    const url = FORM_URL + "?usp=pp_url&" +
+                ENTRY_ID + "=" + encodeURIComponent(maDonHang);
+
+    statusBox.textContent = "Đã quét: " + maDonHang + " — đang mở Form...";
+    statusBox.className = "status ok";
+
+    // Mở ngay trong tab hiện tại.
+    window.location.href = url;
+  }
+
+  function xuLyMaQuet(ma) {
+    if (daQuet) return;
+    daQuet = true;
+
+    // Dừng scanner trước khi chuyển trang.
+    if (window.scanner) {
+      window.scanner.stop().catch(() => {});
+    }
+
+    moGoogleForm(ma);
+  }
+
+  openButton.addEventListener("click", function () {
+    moGoogleForm(manualInput.value);
+  });
+
+  // Hỗ trợ máy quét Barcode Bluetooth/USB:
+  // máy quét thường hoạt động như bàn phím và gửi Enter sau mã.
+  manualInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      moGoogleForm(manualInput.value);
+    }
+  });
+
+
+  // ============================================================
+  // KHỞI ĐỘNG CAMERA
+  // ============================================================
+
+  const statusInitial = "Bấm cho phép Camera nếu Android hỏi quyền.";
+
+  if (!window.Html5Qrcode) {
+    statusBox.textContent =
+      "Không tải được thư viện quét Barcode. Hãy kiểm tra Internet.";
+    statusBox.className = "status error";
+  } else {
+    window.scanner = new Html5Qrcode("reader");
+
+    const config = {
+      fps: 10,
+      qrbox: function(viewfinderWidth, viewfinderHeight) {
+        const width = Math.min(viewfinderWidth * 0.9, 500);
+        const height = Math.min(viewfinderHeight * 0.35, 180);
+        return { width: Math.floor(width), height: Math.floor(height) };
+      },
+      aspectRatio: 1.777778,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.CODE_93,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.ITF
+      ]
+    };
+
+    scanner.start(
+      { facingMode: "environment" },
+      config,
+      function(decodedText) {
+        xuLyMaQuet(decodedText);
+      },
+      function() {
+        // Bỏ qua lỗi đọc từng khung hình để giao diện không nhấp nháy.
+      }
+    ).then(function() {
+      statusBox.textContent = "Sẵn sàng — đưa Barcode vào khung quét.";
+      statusBox.className = "status";
+    }).catch(function(error) {
+      statusBox.textContent =
+        "Không mở được Camera. Hãy cấp quyền Camera cho trình duyệt.";
+      statusBox.className = "status error";
+      console.error(error);
+    });
+  }
+</script>
+</body>
+</html>
