@@ -12,24 +12,26 @@
 h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-align:center;color:#6b7280;font-size:13px}
 .hidden{display:none!important}.department-title{text-align:center;font-size:17px;font-weight:700;margin:14px 0 10px}
 .department-grid{display:grid;gap:10px}.department-button{width:100%;min-height:58px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:17px;font-weight:700}
-.department-bar{
+.app-header.active{
 position:fixed;
 top:0;
 left:50%;
 transform:translateX(-50%);
 width:min(560px,calc(100vw - 24px));
-padding:8px;
-display:flex;
-gap:8px;
-align-items:center;
+padding:10px 14px 8px;
 background:#fff;
-border-radius:0 0 12px 12px;
+border-radius:0 0 14px 14px;
 box-shadow:0 4px 16px rgba(0,0,0,.18);
 z-index:99998;
 }
+.app-header.active h1{font-size:22px;margin:0 0 3px}
+.app-header.active .sub{margin:0 0 8px}
+.department-bar{display:flex;gap:8px;align-items:center}
 .selected-department{flex:1;margin:0;padding:10px;border-radius:10px;background:#eef2ff;color:#3730a3;text-align:center;font-weight:700}
 .change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
-#scannerScreen{padding-top:62px}
+#scannerScreen{padding-top:10px}
+#scannerScreen.active-space{padding-top:145px}
+.formbox.active-space{padding-top:145px}
 .camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}
 #video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
 .camera-controls{display:flex;gap:8px;margin-top:8px}
@@ -54,8 +56,14 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 </head>
 <body>
 <main class="wrap"><section class="card">
+<div id="appHeader" class="app-header">
 <h1>📷 Quét QR Tờ Lệnh 3/2</h1>
 <p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p>
+<div id="departmentBar" class="department-bar hidden">
+<div id="selectedDepartment" class="selected-department"></div>
+<button id="changeDepartment" class="change-department" type="button">🔄 ĐỔI BỘ PHẬN</button>
+</div>
+</div>
 
 <div id="departmentScreen">
 <div class="department-title">Chọn bộ phận</div>
@@ -67,10 +75,6 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 </div></div>
 
 <div id="scannerScreen" class="hidden">
-<div class="department-bar">
-<div id="selectedDepartment" class="selected-department"></div>
-<button id="changeDepartment" class="change-department" type="button">🔄 ĐỔI BỘ PHẬN</button>
-</div>
 <div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div>
 <div class="camera-controls">
 <button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button>
@@ -104,6 +108,7 @@ const DEPARTMENTS={
 };
 
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
+const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar");
 const departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen");
 const selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox");
 const flashButton=document.getElementById("flashButton");
@@ -142,6 +147,10 @@ async function moGoogleForm(chuoiQR){
  try{
   const url=taoLinkForm(chuoiQR);daQuet=true;await dungCamera();
   cameraBox.classList.add("hidden");imageScanBox.classList.add("hidden");manualBox.classList.add("hidden");
+  scannerScreen.classList.add("hidden");
+  appHeader.classList.add("active");
+  departmentBar.classList.remove("hidden");
+  formContainer.classList.add("active-space");
   statusBox.textContent="✅ Đã quét. Điền thông tin rồi bấm Gửi.";statusBox.className="status ok";
   googleForm.src=url+"&embedded=true";formContainer.style.display="block";
   formContainer.scrollIntoView({behavior:"smooth",block:"start"});
@@ -198,7 +207,10 @@ openButton.addEventListener("click",()=>moGoogleForm(manualInput.value));
 manualInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();moGoogleForm(manualInput.value)}});
 
 btnScanAgain.addEventListener("click",async()=>{
- googleForm.src="";formContainer.style.display="none";cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");
+ googleForm.src="";formContainer.style.display="none";formContainer.classList.remove("active-space");
+ scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");
+ cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");
+ appHeader.classList.add("active");departmentBar.classList.remove("hidden");
  daQuet=false;statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";await khoiDong();window.scrollTo({top:0,behavior:"smooth"});
 });
 
@@ -242,7 +254,9 @@ btnHome.addEventListener("click",async()=>{
 
 document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{
  boPhanDangChon=button.dataset.department;selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
- departmentScreen.classList.add("hidden");scannerScreen.classList.remove("hidden");daQuet=false;
+ appHeader.classList.add("active");departmentBar.classList.remove("hidden");
+ departmentScreen.classList.add("hidden");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");
+ formContainer.classList.remove("active-space");daQuet=false;
  statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";window.scrollTo({top:0,behavior:"smooth"});await khoiDong();
 }));
 </script>
