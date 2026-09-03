@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
-<title>Quét QR Tờ Lệnh 3/2</title>
+<title>Quét QR Tờ Lệnh 3/2 - V24</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
+<!-- Version: V24 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -52,7 +53,16 @@ let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,f
 function taoLinkForm(chuoiQR){if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");const parts=String(chuoiQR??"").trim().split("|");if(parts.length!==5)throw new Error("QR không đúng cấu trúc: cần 5 giá trị, hiện có "+parts.length+" giá trị.");const p=new URLSearchParams();p.set("usp","pp_url");ENTRY_IDS.forEach((id,i)=>p.set(id,parts[i].trim()));return DEPARTMENTS[boPhanDangChon]+"?"+p.toString()}
 async function tatFlash(){if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}}flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}
 async function dungCamera(){if(videoTrack){try{await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}videoTrack=null}flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none";if(controls){try{controls.stop()}catch(_){}controls=null}}
-function xuLyMaQuet(text){if(daQuet)return;const value=String(text||"").trim();if(value.split("|").length!==5)return;moGoogleForm(value)}
+function xuLyMaQuet(text){
+    if(daQuet)return;
+
+    // Xu ly truong hop QR bi du dau |
+    const value=String(text||"").trim().replace(/\|\|/g,"|");
+
+    if(value.split("|").length!==5)return;
+
+    moGoogleForm(value);
+}
 async function moGoogleForm(chuoiQR){try{const url=taoLinkForm(chuoiQR);daQuet=true;await tatFlash();cameraBox.classList.add("hidden");imageScanBox.classList.add("hidden");manualBox.classList.add("hidden");scannerScreen.classList.add("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");formContainer.classList.add("active-space");statusBox.textContent="✅ Đã quét. Điền thông tin rồi bấm Gửi.";statusBox.className="status ok";googleForm.src=url+"&embedded=true";formContainer.style.display="block";formContainer.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){statusBox.textContent=e.message;statusBox.className="status error";daQuet=false}}
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
 document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="hidden"){dungStreamCamera();return}if(document.visibilityState==="visible"){const dangQuet=!scannerScreen.classList.contains("hidden");if(dangQuet&&!daQuet){try{await khoiDong()}catch(_){}}}});
