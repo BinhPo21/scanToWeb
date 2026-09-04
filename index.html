@@ -181,7 +181,7 @@ daQuet=false;
 
 function hienCanhBao(sai,url){
 const names=sai.map(x=>x.ten).join(", ");
-warningMessage.textContent="Tờ lệnh đang sai ở: "+names;
+warningMessage.textContent="Tờ lệnh đang sai ở:\n"+names;
 warningModal.classList.remove("hidden");
 
 const tiepTuc=()=>{
