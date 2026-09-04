@@ -71,7 +71,9 @@ if(parts.length===1){maLenh=parts[0].trim();}
 else if(parts.length>3){maLenh=parts[2].trim();}
 else{throw new Error("QR không đúng cấu trúc.");}
 if(!maLenh)throw new Error("Không tìm thấy Mã Lệnh.");
-const ketQua=await traCuuMaLenh(maLenh);
+const ketQua = await traCuuMaLenh(
+    maLenh.replace(/&scale=10$/, "")
+);
 const partsKetQua=String(ketQua??"").trim().split("|");
 if(partsKetQua.length!==5)throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
 const p=new URLSearchParams();p.set("usp","pp_url");ENTRY_IDS.forEach((id,i)=>p.set(id,partsKetQua[i].trim()));
