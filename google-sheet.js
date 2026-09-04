@@ -134,11 +134,10 @@ async function traCuuMaLenh(maLenh) {
     // L  = Kích thước 2
     // M  = Kích thước 3
     // N  = Số lượng 1
-    // O  = Số lượng 2
     // --------------------------------------------------------
 
     const query =
-        "select B,F,G,K,L,M,N,O where B = '" +
+        "select B,F,G,K,L,M,N where B = '" +
         maLenh.replace(/'/g, "''") +
         "'";
 
@@ -307,21 +306,10 @@ async function traCuuMaLenh(maLenh) {
                 // N + O
                 // ------------------------------------------------
 
-                const soLuong1 =
+                const soLuong =
                     parseFloat(
                         getValue(6)
                     ) || 0;
-
-
-                const soLuong2 =
-                    parseFloat(
-                        getValue(7)
-                    ) || 0;
-
-
-                const tongSoLuong =
-                    soLuong1 +
-                    soLuong2;
 
 
                 // ------------------------------------------------
@@ -337,7 +325,7 @@ async function traCuuMaLenh(maLenh) {
                     "|" +
                     kichThuoc +
                     "|" +
-                    tongSoLuong;
+                    soLuong;
 
 
                 resolve(ketQua);
