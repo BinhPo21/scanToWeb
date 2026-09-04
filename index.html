@@ -113,7 +113,7 @@ const ketQua=await traCuuMaLenh(maLenh);
 const partsKetQua=tachGiaTriQR(ketQua);
 if(partsKetQua.length!==5)throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
 
-const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","SL Đơn Hàng"];
+const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng ĐH"];
 const sai=[];
 
 if(canKiemTra){
