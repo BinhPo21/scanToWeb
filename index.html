@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V35 -->
+<!-- Version: V37 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -66,7 +66,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 <button id="pasteButton" type="button">📋 Dán</button>
 <button id="openButton" type="button">Mở Google Form</button>
 </div>
-</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
+</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với dữ liệu mới nhất; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
 </section></main>
 <script src="google-sheet.js"></script>
@@ -131,12 +131,12 @@ if(ketQua){
     }
 }else if(parts.length===1){
     // QR chỉ có 1 mã:
-    // Không tìm thấy Google Sheet sau 5 lần vẫn mở Form.
+    // Không tìm thấy dữ liệu vẫn mở Form.
     // Chỉ điền Mã Lệnh, các trường khác để trống.
     partsKetQua=["","",maLenh,"",""];
 }else{
     // QR 5/6 mã:
-    // Không tìm thấy Google Sheet sau 5 lần thì bỏ qua kiểm tra
+    // Không tìm thấy dữ liệu thì bỏ qua kiểm tra
     // và dùng dữ liệu QR đã quy về 5 mã.
     partsKetQua=qr5;
 }
