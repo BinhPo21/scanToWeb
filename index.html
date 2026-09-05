@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V32 -->
+<!-- Version: V34 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -116,16 +116,35 @@ maLenh=boScale10(maLenh);
 if(!maLenh)throw new Error("Không tìm thấy Mã Lệnh.");
 
 const ketQua=await traCuuMaLenh(maLenh);
-const partsKetQua=tachGiaTriQR(ketQua);
 
-// Kích Đơn: quy dấu "." và "," về cùng dấu ","
-partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
-if(partsKetQua.length!==5)throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
+let partsKetQua;
+
+if(ketQua){
+    // Có dữ liệu Google Sheet
+    partsKetQua=tachGiaTriQR(ketQua);
+
+    // Kích Đơn: quy dấu "." và "," về cùng dấu ","
+    partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
+
+    if(partsKetQua.length!==5){
+        throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
+    }
+}else if(parts.length===1){
+    // QR chỉ có 1 mã:
+    // Không tìm thấy Google Sheet sau 5 lần vẫn mở Form.
+    // Chỉ điền Mã Lệnh, các trường khác để trống.
+    partsKetQua=["","",maLenh,"",""];
+}else{
+    // QR 5/6 mã:
+    // Không tìm thấy Google Sheet sau 5 lần thì bỏ qua kiểm tra
+    // và dùng dữ liệu QR đã quy về 5 mã.
+    partsKetQua=qr5;
+}
 
 const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng ĐH"];
 const sai=[];
 
-if(canKiemTra){
+if(canKiemTra && ketQua){
     for(let i=0;i<5;i++){
         // Mã Lệnh (vị trí 3) luôn cố định, không đưa vào cảnh báo.
         if(i===2)continue;

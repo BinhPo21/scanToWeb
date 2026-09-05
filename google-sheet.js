@@ -44,7 +44,7 @@ async function taiCauHinhGoogleSheet() {
 //     5. Tra cứu dữ liệu
 // ============================================================
 
-async function traCuuMaLenh(maLenh) {
+async function traCuuMaLenhMotLan(maLenh) {
 
     maLenh = String(maLenh).trim();
 
@@ -177,7 +177,7 @@ async function traCuuMaLenh(maLenh) {
                 )
             );
 
-        }, 15000);
+        }, 5000);
 
 
         function cleanup() {
@@ -362,4 +362,44 @@ async function traCuuMaLenh(maLenh) {
 
     });
 
+}
+
+// ============================================================
+// Tra cứu Mã Lệnh - tự thử lại tối đa 5 lần
+// Có kết quả thì dừng ngay.
+// Hết 5 lần không có kết quả thì trả về null.
+// ============================================================
+async function traCuuMaLenh(maLenh) {
+
+    const MAX_LAN_THU = 5;
+    const THOI_GIAN_CHO = 1000;
+
+    for (let lan = 1; lan <= MAX_LAN_THU; lan++) {
+
+        try {
+            const ketQua = await traCuuMaLenhMotLan(maLenh);
+
+            if (ketQua && String(ketQua).trim()) {
+                return ketQua;
+            }
+
+        } catch (error) {
+            console.log(
+                "Tra cứu Mã Lệnh lần " +
+                lan +
+                "/" +
+                MAX_LAN_THU +
+                " thất bại:",
+                error.message
+            );
+        }
+
+        if (lan < MAX_LAN_THU) {
+            await new Promise(resolve =>
+                setTimeout(resolve, THOI_GIAN_CHO)
+            );
+        }
+    }
+
+    return null;
 }
