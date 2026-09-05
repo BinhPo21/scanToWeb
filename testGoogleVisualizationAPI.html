@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Test Google Visualization API</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    padding:20px;
+}
+
+input,button{
+    padding:12px;
+    font-size:16px;
+    margin:5px 0;
+}
+
+input{
+    width:300px;
+}
+
+button{
+    cursor:pointer;
+}
+
+#result{
+    margin-top:20px;
+    padding:15px;
+    background:#f3f4f6;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Test tốc độ Google Visualization API</h2>
+
+<input
+    id="maLenh"
+    value="T09.26.85.1"
+    placeholder="Nhập Mã Lệnh"
+>
+
+<br>
+
+<button onclick="test()">🚀 Test</button>
+
+<div id="result">
+Sẵn sàng...
+</div>
+
+
+<script>
+
+async function test(){
+
+    const result =
+        document.getElementById("result");
+
+    const maLenh =
+        document.getElementById("maLenh")
+        .value
+        .trim();
+
+
+    const spreadsheetId =
+        "1GPpPKs8Kj2l3bpw98W9Wux-hXZ69JoysDTvnm9vwVOQ";
+
+
+    const tenSheet =
+        "Lệnh T09.26";
+
+
+    // Query Google Visualization API
+
+    const query =
+        "select B,F,G,K,L,M,N where B = '" +
+        maLenh.replace(/'/g,"''") +
+        "'";
+
+
+    const url =
+        "https://docs.google.com/spreadsheets/d/" +
+        spreadsheetId +
+        "/gviz/tq?" +
+
+        new URLSearchParams({
+
+            sheet: tenSheet,
+
+            tq: query
+
+        }).toString();
+
+
+    result.textContent =
+        "Đang tìm...\n\n" +
+        url;
+
+
+    console.log("URL:",url);
+
+
+    const start =
+        performance.now();
+
+
+    try{
+
+        const response =
+            await fetch(url);
+
+
+        const text =
+            await response.text();
+
+
+        const end =
+            performance.now();
+
+
+        result.textContent =
+            "⏱ Thời gian: " +
+            (end-start).toFixed(0) +
+            " ms\n\n" +
+
+            "HTTP: " +
+            response.status +
+
+            "\n\n" +
+
+            "Kết quả:\n\n" +
+
+            text;
+
+
+        console.log(text);
+
+
+    }catch(error){
+
+        result.textContent =
+            "❌ Lỗi:\n" +
+            error.message;
+
+        console.error(error);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
