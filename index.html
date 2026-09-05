@@ -83,6 +83,10 @@ return String(value??"").replace(/&scale=10/g,"").trim();
 function tachGiaTriQR(value){
 return boScale10(value).replace(/\|\|/g,"|").split("|").map(x=>boScale10(x));
 }
+
+function chuanHoaKichDon(value){
+return String(value??"").trim().replace(/\./g,",");
+}
 async function taoLinkForm(chuoiQR){
 if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
 
@@ -96,10 +100,12 @@ if(parts.length===1){
 }else if(parts.length===6){
     parts.splice(4,1);
     qr5=parts;
+    qr5[3]=chuanHoaKichDon(qr5[3]);
     maLenh=qr5[2];
     canKiemTra=true;
 }else if(parts.length===5){
     qr5=parts;
+    qr5[3]=chuanHoaKichDon(qr5[3]);
     maLenh=qr5[2];
     canKiemTra=true;
 }else{
@@ -111,6 +117,9 @@ if(!maLenh)throw new Error("Không tìm thấy Mã Lệnh.");
 
 const ketQua=await traCuuMaLenh(maLenh);
 const partsKetQua=tachGiaTriQR(ketQua);
+
+// Kích Đơn: quy dấu "." và "," về cùng dấu ","
+partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
 if(partsKetQua.length!==5)throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
 
 const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng ĐH"];
