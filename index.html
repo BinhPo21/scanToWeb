@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V40 -->
+<!-- Version: V41 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -36,7 +36,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 /* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
 .formbox{display:none;margin-top:12px;padding-bottom:180px}
 #googleForm{width:100%;height:1100px;border:0;border-radius:12px;background:#fff;display:block}
-#bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:flex;gap:8px}
+#bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:none;gap:8px}
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
 
@@ -238,12 +238,31 @@ warningOk.addEventListener("click",tiepTuc);
 function moFormSauKhiKiemTra(url){
 googleForm.src=url+"&embedded=true";
 formContainer.style.display="block";
+
+const bottomButtons=document.getElementById("bottomButtons");
+if(bottomButtons)bottomButtons.style.display="flex";
+
 formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
+function damBaoHeaderFooterCoDinh(){
+// Dua Header va Footer ra truc tiep body.
+// Giup position: fixed on dinh tren Android WebView, iOS va trinh duyet.
+if(appHeader.parentElement!==document.body){
+document.body.appendChild(appHeader);
+}
+
+const bottomButtons=document.getElementById("bottomButtons");
+if(bottomButtons&&bottomButtons.parentElement!==document.body){
+document.body.appendChild(bottomButtons);
+}
+}
+
 async function chonBoPhan(boPhan){
 if(!DEPARTMENTS[boPhan])return;
 
 boPhanDangChon=boPhan;
+
+damBaoHeaderFooterCoDinh();
 
 // Luu bo phan gan nhat tren dung thiet bi/app nay.
 try{
@@ -312,7 +331,12 @@ const value=String(manualInput.value||"").trim();
 moGoogleForm(value);
 }
 });
-btnScanAgain.addEventListener("click",async()=>{googleForm.src="";formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
+btnScanAgain.addEventListener("click",async()=>{
+const bottomButtons=document.getElementById("bottomButtons");
+if(bottomButtons)bottomButtons.style.display="none";
+
+googleForm.src="";
+formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
 async function veChonBoPhan(){
 try{
