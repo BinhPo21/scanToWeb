@@ -94,7 +94,8 @@ return String(value??"")
 function chuanHoaSoLuongDonHang(value){
     return String(value??"")
         .trim()
-        .replace(/[.,]/g,"");
+        .replace(/,0/g,"")
+        .replace(/\./g,"");
 }
 
 async function taoLinkForm(chuoiQR){
