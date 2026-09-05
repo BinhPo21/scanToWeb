@@ -92,10 +92,11 @@ return String(value??"")
 }
 
 function chuanHoaSoLuongDonHang(value){
-return String(value??"")
-    .trim()
-    .replace(/,0/g,"");
+    return String(value??"")
+        .trim()
+        .replace(/[.,]/g,"");
 }
+
 async function taoLinkForm(chuoiQR){
 if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
 
