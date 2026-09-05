@@ -365,41 +365,20 @@ async function traCuuMaLenhMotLan(maLenh) {
 }
 
 // ============================================================
-// Tra cứu Mã Lệnh - tự thử lại tối đa 5 lần
-// Có kết quả thì dừng ngay.
-// Hết 5 lần không có kết quả thì trả về null.
+// Tra cứu Mã Lệnh - chỉ tra cứu 1 lần
 // ============================================================
 async function traCuuMaLenh(maLenh) {
+    try {
+        const ketQua = await traCuuMaLenhMotLan(maLenh);
 
-    const MAX_LAN_THU = 5;
-    const THOI_GIAN_CHO = 1000;
-
-    for (let lan = 1; lan <= MAX_LAN_THU; lan++) {
-
-        try {
-            const ketQua = await traCuuMaLenhMotLan(maLenh);
-
-            if (ketQua && String(ketQua).trim()) {
-                return ketQua;
-            }
-
-        } catch (error) {
-            console.log(
-                "Tra cứu Mã Lệnh lần " +
-                lan +
-                "/" +
-                MAX_LAN_THU +
-                " thất bại:",
-                error.message
-            );
+        if (ketQua && String(ketQua).trim()) {
+            return ketQua;
         }
 
-        if (lan < MAX_LAN_THU) {
-            await new Promise(resolve =>
-                setTimeout(resolve, THOI_GIAN_CHO)
-            );
-        }
+        return null;
+
+    } catch (error) {
+        console.log("Tra cứu Mã Lệnh thất bại:", error.message);
+        return null;
     }
-
-    return null;
 }
