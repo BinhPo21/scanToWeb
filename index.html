@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V39 -->
+<!-- Version: V40 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -314,12 +314,23 @@ moGoogleForm(value);
 });
 btnScanAgain.addEventListener("click",async()=>{googleForm.src="";formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
-changeDepartment.addEventListener("click",function(){
+async function veChonBoPhan(){
 try{
 localStorage.removeItem("boPhanGanNhat");
 }catch(_){}
+
+try{
+await dungCamera();
+}catch(_){}
+
 window.location.reload();
-});btnHome.addEventListener("click",async()=>{await dungCamera();window.location.reload()});
+}
+
+changeDepartment.addEventListener("click",async function(){
+await veChonBoPhan();
+});btnHome.addEventListener("click",async()=>{
+await veChonBoPhan();
+});
 document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{
 await chonBoPhan(button.dataset.department);
 }));
