@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V37 -->
+<!-- Version: V38 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -92,12 +92,10 @@ return String(value??"")
 }
 
 function chuanHoaSoLuongDonHang(value){
-    return String(value??"")
-        .trim()
-        .replace(/,0/g,"")
-        .replace(/\./g,"");
+return String(value??"")
+    .trim()
+    .replace(/,0/g,"");
 }
-
 async function taoLinkForm(chuoiQR){
 if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
 
@@ -242,6 +240,32 @@ googleForm.src=url+"&embedded=true";
 formContainer.style.display="block";
 formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
+async function chonBoPhan(boPhan){
+if(!DEPARTMENTS[boPhan])return;
+
+boPhanDangChon=boPhan;
+
+// Luu bo phan gan nhat tren dung thiet bi/app nay.
+try{
+localStorage.setItem("boPhanGanNhat",boPhanDangChon);
+}catch(_){}
+
+document.body.classList.remove("home-mode");
+document.querySelector(".card").classList.remove("home-mode");
+selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
+appHeader.classList.add("active");
+departmentBar.classList.remove("hidden");
+departmentScreen.classList.add("hidden");
+scannerScreen.classList.remove("hidden");
+scannerScreen.classList.add("active-space");
+formContainer.classList.remove("active-space");
+daQuet=false;
+statusBox.textContent="📷 Đang mở camera...";
+statusBox.className="status";
+window.scrollTo({top:0,behavior:"smooth"});
+await khoiDong();
+}
+
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
 document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="hidden"){dungStreamCamera();return}if(document.visibilityState==="visible"){const dangQuet=!scannerScreen.classList.contains("hidden");if(dangQuet&&!daQuet){try{await khoiDong()}catch(_){}}}});
 window.addEventListener("pagehide",dungStreamCamera);window.addEventListener("beforeunload",dungStreamCamera);
@@ -291,7 +315,20 @@ moGoogleForm(value);
 btnScanAgain.addEventListener("click",async()=>{googleForm.src="";formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
 changeDepartment.addEventListener("click",function(){window.location.reload()});btnHome.addEventListener("click",async()=>{await dungCamera();window.location.reload()});
-document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{boPhanDangChon=button.dataset.department;document.body.classList.remove("home-mode");document.querySelector(".card").classList.remove("home-mode");selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;appHeader.classList.add("active");departmentBar.classList.remove("hidden");departmentScreen.classList.add("hidden");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");formContainer.classList.remove("active-space");daQuet=false;statusBox.textContent="📷 Đang mở camera...";statusBox.className="status";window.scrollTo({top:0,behavior:"smooth"});await khoiDong()}));
+document.querySelectorAll(".department-button").forEach(button=>button.addEventListener("click",async()=>{
+await chonBoPhan(button.dataset.department);
+}));
+
+document.addEventListener("DOMContentLoaded",async()=>{
+try{
+const boPhanDaLuu=localStorage.getItem("boPhanGanNhat");
+if(boPhanDaLuu&&DEPARTMENTS[boPhanDaLuu]){
+await chonBoPhan(boPhanDaLuu);
+}
+}catch(error){
+console.error("Khong the khoi phuc bo phan da luu:",error);
+}
+});
 </script>
 </body>
 </html>
