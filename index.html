@@ -66,7 +66,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 <button id="pasteButton" type="button">📋 Dán</button>
 <button id="openButton" type="button">Mở Google Form</button>
 </div>
-</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với dữ liệu mới nhất; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
+</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
 </section></main>
 <script src="google-sheet.js"></script>
@@ -85,7 +85,16 @@ return boScale10(value).replace(/\|\|/g,"|").split("|").map(x=>boScale10(x));
 }
 
 function chuanHoaKichDon(value){
-return String(value??"").trim().replace(/\./g,",");
+return String(value??"")
+    .trim()
+    .replace(/\./g,",")
+    .replace(/,0/g,"");
+}
+
+function chuanHoaSoLuongDonHang(value){
+return String(value??"")
+    .trim()
+    .replace(/,0/g,"");
 }
 async function taoLinkForm(chuoiQR){
 if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
@@ -101,11 +110,13 @@ if(parts.length===1){
     parts.splice(4,1);
     qr5=parts;
     qr5[3]=chuanHoaKichDon(qr5[3]);
+    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
     maLenh=qr5[2];
     canKiemTra=true;
 }else if(parts.length===5){
     qr5=parts;
     qr5[3]=chuanHoaKichDon(qr5[3]);
+    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
     maLenh=qr5[2];
     canKiemTra=true;
 }else{
@@ -123,20 +134,24 @@ if(ketQua){
     // Có dữ liệu Google Sheet
     partsKetQua=tachGiaTriQR(ketQua);
 
-    // Kích Đơn: quy dấu "." và "," về cùng dấu ","
+    // Quy Cách Đơn Hàng: quy dấu "." và "," về cùng dấu ",",
+    // sau đó bỏ toàn bộ ",0".
     partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
+
+    // Số Lượng Đơn Hàng: bỏ toàn bộ ",0".
+    partsKetQua[4]=chuanHoaSoLuongDonHang(partsKetQua[4]);
 
     if(partsKetQua.length!==5){
         throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
     }
 }else if(parts.length===1){
     // QR chỉ có 1 mã:
-    // Không tìm thấy dữ liệu vẫn mở Form.
+    // Không tìm thấy Google Sheet sau 5 lần vẫn mở Form.
     // Chỉ điền Mã Lệnh, các trường khác để trống.
     partsKetQua=["","",maLenh,"",""];
 }else{
     // QR 5/6 mã:
-    // Không tìm thấy dữ liệu thì bỏ qua kiểm tra
+    // Không tìm thấy Google Sheet sau 5 lần thì bỏ qua kiểm tra
     // và dùng dữ liệu QR đã quy về 5 mã.
     partsKetQua=qr5;
 }
