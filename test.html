@@ -75,7 +75,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 </div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
 </section></main>
-<script src="google-sheet.js"></script>
+<script src="google-sheet-API.js"></script>
 <script type="module">
 import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
 const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform"};
