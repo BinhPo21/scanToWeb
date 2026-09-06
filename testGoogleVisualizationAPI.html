@@ -7,6 +7,7 @@
 <title>Test Google Visualization API</title>
 
 <style>
+
 body{
     font-family:Arial,sans-serif;
     padding:20px;
@@ -19,7 +20,9 @@ input,button{
 }
 
 input{
-    width:300px;
+    width:100%;
+    max-width:500px;
+    box-sizing:border-box;
 }
 
 button{
@@ -33,16 +36,25 @@ button{
     white-space:pre-wrap;
     word-break:break-word;
 }
+
+.ok{
+    color:green;
+}
+
+.error{
+    color:red;
+}
+
 </style>
 </head>
 
 <body>
 
-<h2>Test tốc độ Google Visualization API</h2>
+<h2>🔍 Test Google Visualization API</h2>
 
 <input
     id="maLenh"
-    value="T09.26.85.1"
+    value="T09.26.140.1.10"
     placeholder="Nhập Mã Lệnh"
 >
 
@@ -57,32 +69,54 @@ Sẵn sàng...
 
 <script>
 
-async function test(){
 
-    const result =
-        document.getElementById("result");
-
-    const maLenh =
-        document.getElementById("maLenh")
-        .value
-        .trim();
+const spreadsheetId =
+    "1GPpPKs8Kj2l3bpw98W9Wux-hXZ69JoysDTvnm9vwVOQ";
 
 
-    const spreadsheetId =
-        "1GPpPKs8Kj2l3bpw98W9Wux-hXZ69JoysDTvnm9vwVOQ";
+
+/*
+    Xác định Sheet API theo Mã Lệnh
+
+    T08.x.x... → API_T08.26
+    T09.x.x... → API_T09.26
+*/
+
+function layTenSheet(maLenh){
+
+    const match =
+        maLenh.match(/^T(\d{2})\.(\d{2})\./i);
 
 
-    const tenSheet =
-        "Lệnh T09.26";
+    if(!match){
+
+        return null;
+
+    }
 
 
-    // Query Google Visualization API
+    const thang =
+        match[1];
 
-    const query =
-        "select B,F,G,K,L,M,N where B = '" +
-        maLenh.replace(/'/g,"''") +
-        "'";
 
+    const nam =
+        match[2];
+
+
+    return "API_T" +
+        thang +
+        "." +
+        nam;
+
+}
+
+
+
+/*
+    Gửi Query tới Google Visualization API
+*/
+
+async function chayQuery(tenSheet,query){
 
     const url =
         "https://docs.google.com/spreadsheets/d/" +
@@ -91,68 +125,254 @@ async function test(){
 
         new URLSearchParams({
 
-            sheet: tenSheet,
+            sheet:tenSheet,
 
-            tq: query
+            tq:query
 
         }).toString();
-
-
-    result.textContent =
-        "Đang tìm...\n\n" +
-        url;
-
-
-    console.log("URL:",url);
 
 
     const start =
         performance.now();
 
 
+    const response =
+        await fetch(url);
+
+
+    const text =
+        await response.text();
+
+
+    const end =
+        performance.now();
+
+
+    /*
+        Đếm số dòng kết quả
+    */
+
+    let soDong = 0;
+
+
     try{
 
-        const response =
-            await fetch(url);
+        const jsonText =
+            text
+            .replace(
+                "/*O_o*/\ngoogle.visualization.Query.setResponse(",
+                ""
+            )
+            .replace(
+                ");",
+                ""
+            );
 
 
-        const text =
-            await response.text();
+        const data =
+            JSON.parse(jsonText);
 
 
-        const end =
-            performance.now();
+        soDong =
+            data.table.rows.length;
+
+
+    }catch(e){
+
+        console.log(
+            "Không parse được JSON",
+            e
+        );
+
+    }
+
+
+    return {
+
+        url:url,
+
+        http:response.status,
+
+        text:text,
+
+        time:(end-start).toFixed(0),
+
+        soDong:soDong
+
+    };
+
+}
+
+
+
+/*
+    Test
+*/
+
+async function test(){
+
+
+    const result =
+        document.getElementById("result");
+
+
+    const maLenh =
+        document
+        .getElementById("maLenh")
+        .value
+        .trim();
+
+
+    if(!maLenh){
+
+        result.textContent =
+            "❌ Chưa nhập Mã Lệnh";
+
+        return;
+
+    }
+
+
+    /*
+        Xác định Sheet
+    */
+
+    const tenSheet =
+        layTenSheet(maLenh);
+
+
+    if(!tenSheet){
+
+        result.textContent =
+            "❌ Không xác định được Sheet từ Mã Lệnh:\n\n" +
+            maLenh;
+
+        return;
+
+    }
+
+
+    /*
+        Escape dấu nháy đơn
+    */
+
+    const maLenhSafe =
+        maLenh.replace(/'/g,"''");
+
+
+    /*
+        Query tìm chính xác
+    */
+
+    const queryChinhXac =
+        "select B,F,G,K,L,M,N where B = '" +
+        maLenhSafe +
+        "'";
+
+
+    result.textContent =
+        "⏳ Đang tìm...\n\n" +
+
+        "🔍 MÃ LỆNH: " +
+        maLenh +
+
+        "\n\n📄 SHEET API: " +
+        tenSheet +
+
+        "\n\nQuery:\n" +
+        queryChinhXac;
+
+
+    try{
+
+
+        const data =
+            await chayQuery(
+                tenSheet,
+                queryChinhXac
+            );
+
+
+        let ketQua =
+
+
+            "🔍 MÃ LỆNH: " +
+            maLenh +
+
+
+            "\n\n📄 SHEET API: " +
+            tenSheet +
+
+
+            "\n\n━━━━━━━━━━━━━━━━━━\n" +
+
+            "⏱ Thời gian: " +
+            data.time +
+            " ms" +
+
+
+            "\nHTTP: " +
+            data.http +
+
+
+            "\n📊 Số dòng tìm thấy: " +
+            data.soDong +
+
+
+            "\n━━━━━━━━━━━━━━━━━━\n\n" +
+
+            "📋 QUERY:\n" +
+            queryChinhXac +
+
+
+            "\n\n━━━━━━━━━━━━━━━━━━\n\n" +
+
+            "📄 KẾT QUẢ RAW:\n\n" +
+            data.text;
 
 
         result.textContent =
-            "⏱ Thời gian: " +
-            (end-start).toFixed(0) +
-            " ms\n\n" +
-
-            "HTTP: " +
-            response.status +
-
-            "\n\n" +
-
-            "Kết quả:\n\n" +
-
-            text;
+            ketQua;
 
 
-        console.log(text);
+        console.log(
+            "Sheet:",
+            tenSheet
+        );
+
+
+        console.log(
+            "Kết quả:",
+            data.text
+        );
 
 
     }catch(error){
 
+
         result.textContent =
-            "❌ Lỗi:\n" +
+
+
+            "❌ LỖI\n\n" +
+
+            "Mã Lệnh: " +
+            maLenh +
+
+
+            "\nSheet: " +
+            tenSheet +
+
+
+            "\n\n" +
             error.message;
+
 
         console.error(error);
 
     }
 
 }
+
 
 </script>
 
