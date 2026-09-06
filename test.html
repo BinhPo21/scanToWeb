@@ -163,7 +163,7 @@ if(ketQua){
     partsKetQua=qr5;
 }
 
-const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng ĐH"];
+const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng Đơn Hàng"];
 const sai=[];
 
 if(canKiemTra && ketQua){
@@ -245,7 +245,7 @@ warningMessage.innerHTML=sai.map(item=>{
         <div class="warning-value">
             <span class="warning-label">Tờ Lệnh:</span> ${qr}
             <span class="warning-arrow">→</span>
-            <span class="warning-label">Google Sheet:</span> ${sheet}
+            <span class="warning-label">Mới Nhất:</span> ${sheet}
         </div>
     </div>`;
 }).join("");
