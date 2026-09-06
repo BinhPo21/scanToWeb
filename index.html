@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V41 -->
+<!-- Version: V43 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -43,7 +43,13 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100000}
 .modal-box{width:min(430px,100%);background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
 .modal-title{margin:0 0 12px;font-size:19px;font-weight:700;color:#991b1b;text-align:center}
-.modal-message{font-size:16px;line-height:1.5;text-align:center;white-space:pre-line;color:#111827}
+.modal-message{font-size:16px;line-height:1.5;text-align:left;white-space:normal;color:#111827}
+.warning-item{margin-top:14px;padding-top:12px;border-top:1px solid #e5e7eb}
+.warning-item:first-child{margin-top:0;padding-top:0;border-top:0}
+.warning-name{font-weight:700;color:#b91c1c;margin-bottom:5px}
+.warning-value{font-size:14px;line-height:1.55;word-break:break-word}
+.warning-label{font-weight:700;color:#374151}
+.warning-arrow{padding:0 4px;color:#6b7280}
 .modal-ok{display:block;width:100%;margin-top:18px;min-height:48px;border:0;border-radius:10px;background:#4f46e5;color:#fff;font-size:16px;font-weight:700}
 </style>
 </head>
@@ -66,7 +72,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 <button id="pasteButton" type="button">📋 Dán</button>
 <button id="openButton" type="button">Mở Google Form</button>
 </div>
-</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet.<br>Mã Lệnh luôn bỏ qua khi không tìm thấy!</div></div>
+</div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet; Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
 </section></main>
 <script src="google-sheet.js"></script>
@@ -157,7 +163,7 @@ if(ketQua){
     partsKetQua=qr5;
 }
 
-const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng ĐH"];
+const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng Đơn Hàng"];
 const sai=[];
 
 if(canKiemTra && ketQua){
@@ -224,8 +230,26 @@ daQuet=false;
 }
 
 function hienCanhBao(sai,url){
-const names=sai.map(x=>x.ten).join(", ");
-warningMessage.textContent="Tờ lệnh đang sai ở:\n"+names;
+const warningTitle=document.getElementById("warningTitle");
+
+// Hien thi chi nhung truong co gia tri khac nhau.
+warningTitle.textContent="⚠️ Tờ lệnh có thông tin khác";
+
+warningMessage.innerHTML=sai.map(item=>{
+    const ten=escapeHtml(item.ten);
+    const qr=escapeHtml(item.qr);
+    const sheet=escapeHtml(item.sheet);
+
+    return `<div class="warning-item">
+        <div class="warning-name">🔴 ${ten}</div>
+        <div class="warning-value">
+            <span class="warning-label">Tờ Lệnh:</span> ${qr}
+            <span class="warning-arrow">→</span>
+            <span class="warning-label">Mới Nhất:</span> ${sheet}
+        </div>
+    </div>`;
+}).join("");
+
 warningModal.classList.remove("hidden");
 
 const tiepTuc=()=>{
@@ -234,6 +258,15 @@ warningOk.removeEventListener("click",tiepTuc);
 moFormSauKhiKiemTra(url);
 };
 warningOk.addEventListener("click",tiepTuc);
+}
+
+function escapeHtml(value){
+return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 function moFormSauKhiKiemTra(url){
