@@ -35,7 +35,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 .info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}
 /* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
 .formbox{display:none;margin-top:12px;padding-bottom:180px}
-#googleForm{width:100%;height:1100px;border:0;border-radius:12px;background:#fff;display:block}
+#googleForm{width:100%;min-height:80dvh;height:100%;border:0;border-radius:12px;background:#fff;display:block;overflow:hidden}
 #bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:none;gap:8px}
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
@@ -64,7 +64,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 </div>
 <main class="wrap"><section class="card home-mode">
 <div id="appHeader" class="app-header"><h1>📷 Quét QR Tờ Lệnh 3/2</h1><p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p><div id="departmentBar" class="department-bar hidden"><div id="selectedDepartment" class="selected-department"></div><button id="changeDepartment" class="change-department" type="button">🔄 Bộ Phận</button></div></div>
-<div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button></div></div>
+<div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button><button class="department-button" data-department="Thanh V">📝 THANH V</button></div></div>
 <div id="scannerScreen" class="hidden"><div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div><div class="camera-controls"><button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button></div><div id="status" class="status">Đang tải bộ quét QR...</div><div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ Chọn Ảnh Quét QR</label></div><div class="manual" id="manualBox">
 <label class="manual-label" for="manualCode">Nhập mã QR nếu cần</label>
 <input id="manualCode" type="text" autocomplete="off" placeholder="Dán chuỗi QR vào đây">
@@ -78,7 +78,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 <script src="google-sheet-API.js"></script>
 <script type="module">
 import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
-const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform"};
+const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform","Thanh V":"https://docs.google.com/forms/d/e/1FAIpQLSdMGu0cHh7d0oF0cwkD8WB_TCahiMz9FVYC4PHEsX3mw2CgHg/viewform"};
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar"),departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen"),selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox"),flashButton=document.getElementById("flashButton"),video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox"),imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode"),pasteButton=document.getElementById("pasteButton"),openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm"),btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
 let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false;
@@ -271,10 +271,16 @@ return String(value??"")
 
 function moFormSauKhiKiemTra(url){
 googleForm.src=url+"&embedded=true";
+googleForm.style.height="100vh";
 formContainer.style.display="block";
 
 const bottomButtons=document.getElementById("bottomButtons");
-if(bottomButtons)bottomButtons.style.display="flex";
+if(bottomButtons){
+    bottomButtons.style.display="flex";
+    btnScanAgain.style.display="";
+    btnHome.style.display="";
+    btnHome.style.flex="";
+}
 
 formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -302,6 +308,41 @@ damBaoHeaderFooterCoDinh();
 try{
 localStorage.setItem("boPhanGanNhat",boPhanDangChon);
 }catch(_){}
+
+// Thanh V khong quet QR. Mo truc tiep Google Form dang nhung.
+if(boPhanDangChon==="Thanh V"){
+    try{await dungCamera();}catch(_){}
+
+    document.body.classList.remove("home-mode");
+    document.querySelector(".card").classList.remove("home-mode");
+    selectedDepartment.textContent="Bộ phận: Thanh V";
+    appHeader.classList.add("active");
+    departmentBar.classList.remove("hidden");
+    departmentScreen.classList.add("hidden");
+    scannerScreen.classList.add("hidden");
+    formContainer.classList.add("active-space");
+    daQuet=true;
+
+    googleForm.src=DEPARTMENTS["Thanh V"]+"?embedded=true";
+    googleForm.style.height="100vh";
+    formContainer.style.display="block";
+
+    // Thanh V chi co nut doi bo phan, khong co nut Quet To Lenh Khac.
+    const bottomButtons=document.getElementById("bottomButtons");
+    if(bottomButtons){
+        bottomButtons.style.display="flex";
+        btnScanAgain.style.display="none";
+        btnHome.style.display="block";
+        btnHome.style.flex="1";
+    }
+
+    formContainer.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+}
+
+// Cac bo phan khac quay lai giao dien quet QR binh thuong.
+btnScanAgain.style.display="";
+btnHome.style.flex="";
 
 document.body.classList.remove("home-mode");
 document.querySelector(".card").classList.remove("home-mode");
