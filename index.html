@@ -35,7 +35,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 .info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}
 /* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
 .formbox{display:none;margin-top:12px;padding-bottom:180px}
-#googleForm{width:100%;height:1100px;border:0;border-radius:12px;background:#fff;display:block}
+#googleForm{width:100%;min-height:80dvh;height:100%;border:0;border-radius:12px;background:#fff;display:block;overflow:hidden}
 #bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:none;gap:8px}
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
@@ -271,6 +271,7 @@ return String(value??"")
 
 function moFormSauKhiKiemTra(url){
 googleForm.src=url+"&embedded=true";
+googleForm.style.height="100vh";
 formContainer.style.display="block";
 
 const bottomButtons=document.getElementById("bottomButtons");
@@ -323,6 +324,7 @@ if(boPhanDangChon==="Thanh V"){
     daQuet=true;
 
     googleForm.src=DEPARTMENTS["Thanh V"]+"?embedded=true";
+    googleForm.style.height="100vh";
     formContainer.style.display="block";
 
     // Thanh V chi co nut doi bo phan, khong co nut Quet To Lenh Khac.
