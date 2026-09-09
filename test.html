@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V43 -->
+<!-- Version: V44 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -33,9 +33,9 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 #pasteButton{background:#6b7280}
 #openButton{background:#4f46e5}
 .info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}
-/* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
-.formbox{display:none;margin-top:12px;padding-bottom:180px}
-#googleForm{width:100%;min-height:80dvh;height:100%;border:0;border-radius:12px;background:#fff;display:block;overflow:hidden}
+/* Khắc phục triệt để xung đột scroll bằng cách giới hạn chiều cao iframe vừa khít dvh và thêm -webkit-overflow-scrolling */
+.formbox{display:none;margin-top:12px;padding-bottom:90px}
+#googleForm{width:100%;height:calc(100dvh - 130px);border:0;border-radius:12px;background:#fff;display:block;-webkit-overflow-scrolling:touch}
 #bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:none;gap:8px}
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
@@ -138,28 +138,16 @@ const ketQua=await traCuuMaLenh(maLenh);
 let partsKetQua;
 
 if(ketQua){
-    // Có dữ liệu Google Sheet
     partsKetQua=tachGiaTriQR(ketQua);
-
-    // Quy Cách Đơn Hàng: quy dấu "." và "," về cùng dấu ",",
-    // sau đó bỏ toàn bộ ",0".
     partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
-
-    // Số Lượng Đơn Hàng: bỏ toàn bộ ",0".
     partsKetQua[4]=chuanHoaSoLuongDonHang(partsKetQua[4]);
 
     if(partsKetQua.length!==5){
         throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
     }
 }else if(parts.length===1){
-    // QR chỉ có 1 mã:
-    // Không tìm thấy Google Sheet sau 5 lần vẫn mở Form.
-    // Chỉ điền Mã Lệnh, các trường khác để trống.
     partsKetQua=["","",maLenh,"",""];
 }else{
-    // QR 5/6 mã:
-    // Không tìm thấy Google Sheet sau 5 lần thì bỏ qua kiểm tra
-    // và dùng dữ liệu QR đã quy về 5 mã.
     partsKetQua=qr5;
 }
 
@@ -168,7 +156,6 @@ const sai=[];
 
 if(canKiemTra && ketQua){
     for(let i=0;i<5;i++){
-        // Mã Lệnh (vị trí 3) luôn cố định, không đưa vào cảnh báo.
         if(i===2)continue;
         if(qr5[i]!==partsKetQua[i]){
             sai.push({ten:tenTruong[i],qr:qr5[i],sheet:partsKetQua[i]});
@@ -190,11 +177,8 @@ async function tatFlash(){if(videoTrack){try{if(videoTrack.getCapabilities&&vide
 async function dungCamera(){if(videoTrack){try{await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}videoTrack=null}flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none";if(controls){try{controls.stop()}catch(_){}controls=null}}
 function xuLyMaQuet(text){
     if(daQuet)return;
-
     const value=String(text||"").trim().replace(/\|\|/g,"|");
-
     if(!value)return;
-
     moGoogleForm(value);
 }
 async function moGoogleForm(chuoiQR){
@@ -231,8 +215,6 @@ daQuet=false;
 
 function hienCanhBao(sai,url){
 const warningTitle=document.getElementById("warningTitle");
-
-// Hien thi chi nhung truong co gia tri khac nhau.
 warningTitle.textContent="⚠️ Tờ lệnh có thông tin khác";
 
 warningMessage.innerHTML=sai.map(item=>{
@@ -271,7 +253,7 @@ return String(value??"")
 
 function moFormSauKhiKiemTra(url){
 googleForm.src=url+"&embedded=true";
-googleForm.style.height="100vh";
+googleForm.style.height="calc(100dvh - 130px)";
 formContainer.style.display="block";
 
 const bottomButtons=document.getElementById("bottomButtons");
@@ -285,12 +267,9 @@ if(bottomButtons){
 formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function damBaoHeaderFooterCoDinh(){
-// Dua Header va Footer ra truc tiep body.
-// Giup position: fixed on dinh tren Android WebView, iOS va trinh duyet.
 if(appHeader.parentElement!==document.body){
 document.body.appendChild(appHeader);
 }
-
 const bottomButtons=document.getElementById("bottomButtons");
 if(bottomButtons&&bottomButtons.parentElement!==document.body){
 document.body.appendChild(bottomButtons);
@@ -301,15 +280,12 @@ async function chonBoPhan(boPhan){
 if(!DEPARTMENTS[boPhan])return;
 
 boPhanDangChon=boPhan;
-
 damBaoHeaderFooterCoDinh();
 
-// Luu bo phan gan nhat tren dung thiet bi/app nay.
 try{
 localStorage.setItem("boPhanGanNhat",boPhanDangChon);
 }catch(_){}
 
-// Thanh V khong quet QR. Mo truc tiep Google Form dang nhung.
 if(boPhanDangChon==="Thanh V"){
     try{await dungCamera();}catch(_){}
 
@@ -324,10 +300,9 @@ if(boPhanDangChon==="Thanh V"){
     daQuet=true;
 
     googleForm.src=DEPARTMENTS["Thanh V"]+"?embedded=true";
-    googleForm.style.height="100vh";
+    googleForm.style.height="calc(100dvh - 130px)";
     formContainer.style.display="block";
 
-    // Thanh V chi co nut doi bo phan, khong co nut Quet To Lenh Khac.
     const bottomButtons=document.getElementById("bottomButtons");
     if(bottomButtons){
         bottomButtons.style.display="flex";
@@ -340,7 +315,6 @@ if(boPhanDangChon==="Thanh V"){
     return;
 }
 
-// Cac bo phan khac quay lai giao dien quet QR binh thuong.
 btnScanAgain.style.display="";
 btnHome.style.flex="";
 
@@ -368,23 +342,15 @@ imageInput.addEventListener("change",async function(){const file=this.files&&thi
 pasteButton.addEventListener("click",async()=>{
 try{
 let text="";
-
-// WebToApp co NativeBridge doc truc tiep clipboard Android.
-// Uu tien cach nay vi navigator.clipboard co the bi gioi han trong WebView.
 if(window.NativeBridge&&typeof window.NativeBridge.getClipboardText==="function"){
 text=window.NativeBridge.getClipboardText()||"";
 }
-
-// Neu khong co NativeBridge hoac bridge khong tra du lieu,
-// thu lai bang Clipboard API chuan cua trinh duyet.
 if(!text&&navigator.clipboard&&typeof navigator.clipboard.readText==="function"){
 text=await navigator.clipboard.readText();
 }
-
 if(!text){
 throw new Error("Clipboard rong hoac WebToApp chua cap quyen doc clipboard.");
 }
-
 manualInput.value=text;
 manualInput.focus();
 }catch(error){
@@ -417,11 +383,9 @@ async function veChonBoPhan(){
 try{
 localStorage.removeItem("boPhanGanNhat");
 }catch(_){}
-
 try{
 await dungCamera();
 }catch(_){}
-
 window.location.reload();
 }
 
