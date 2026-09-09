@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V56 - WebToApp fallback iframe -->
+<!-- Version: V57-A - WebToApp bo padding-top Form -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -19,7 +19,25 @@ body.home-mode{overflow:hidden}.hidden{display:none!important}.department-title{
 .app-header.active h1{font-size:22px;margin:0 0 3px}.app-header.active .sub{margin:0 0 8px}.department-bar{display:flex;gap:8px;align-items:center}
 .selected-department{flex:1;margin:0;padding:10px;border-radius:10px;background:#eef2ff;color:#3730a3;text-align:center;font-weight:700}
 .change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
-#scannerScreen{padding-top:10px}#scannerScreen.active-space{padding-top:145px}.formbox.active-space{padding-top:145px}
+#scannerScreen{
+    padding-top:10px;
+}
+
+#scannerScreen.active-space{
+    padding-top:145px;
+}
+
+/* Form tren trinh duyet binh thuong */
+.formbox.active-space{
+    padding-top:145px;
+}
+
+/* V57-A:
+   WebToApp khong dung padding-top 145px cho Form.
+   Android WebView co the day iframe xuong tao khoang trang lon. */
+body.webtoapp-mode .formbox.active-space{
+    padding-top:0 !important;
+}
 .camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}#video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
 .camera-controls{display:flex;gap:8px;margin-top:8px}.flash-button{flex:1;min-height:44px;border:0;border-radius:10px;background:#374151;color:#fff;font-size:14px;font-weight:700}.flash-button.on{background:#f59e0b;color:#111827}
 .scan-box{position:absolute;left:50%;top:50%;width:min(72vw,330px);height:min(72vw,330px);transform:translate(-50%,-50%);border:4px solid #fff;border-radius:4px;pointer-events:none}
@@ -104,11 +122,11 @@ body.form-scroll-mode #bottomButtons{
 <div id="appHeader" class="app-header"><h1>📷 Quét QR Tờ Lệnh 3/2</h1><p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p><div id="departmentBar" class="department-bar hidden"><div id="selectedDepartment" class="selected-department"></div><button id="changeDepartment" class="change-department" type="button">🔄 Bộ Phận</button></div></div>
 <div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button><button class="department-button" data-department="Thanh V">📝 THANH V</button><button class="department-button" data-department="Giấy Tổ Ong">🐝 GIẤY TỔ ONG</button></div></div>
 <div id="scannerScreen" class="hidden"><div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div><div class="camera-controls"><button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button></div><div id="status" class="status">Đang tải bộ quét QR...</div><div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ Chọn Ảnh Quét QR</label></div><div class="manual" id="manualBox">
-<label class="manual-label" for="manualCode">Nhập mã QR nếu cần</label>
-<input id="manualCode" type="text" autocomplete="off" placeholder="Dán chuỗi QR vào đây">
+<label class="manual-label" for="manualCode">Nhập Mã Lệnh hoặc Chuỗi QR</label>
+<input id="manualCode" type="text" autocomplete="off" placeholder="Nhập Mã Lệnh hoặc Chuỗi QR">
 <div class="manual-buttons">
 <button id="pasteButton" type="button">📋 Dán</button>
-<button id="openButton" type="button">Mở Google Form</button>
+<button id="openButton" type="button">Mở Form</button>
 </div>
 </div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet.<br> Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
@@ -312,6 +330,16 @@ return String(value??"")
 // position:fixed + overflow:hidden, vi vay giu layout iframe co dien.
 function laWebToApp(){
     return !!(window.NativeBridge);
+}
+
+function danhDauCheDoWebToApp(){
+
+    // Danh dau moi truong de CSS xu ly rieng cho WebToApp.
+    if(laWebToApp()){
+        document.body.classList.add("webtoapp-mode");
+    }else{
+        document.body.classList.remove("webtoapp-mode");
+    }
 }
 
 function batCheDoFormScrollNeuHoTro(){
@@ -571,6 +599,10 @@ await chonBoPhan(button.dataset.department);
 }));
 
 document.addEventListener("DOMContentLoaded",async()=>{
+
+// Danh dau dang chay trong WebToApp hay trinh duyet thuong.
+danhDauCheDoWebToApp();
+
 try{
 const boPhanDaLuu=localStorage.getItem("boPhanGanNhat");
 if(boPhanDaLuu&&DEPARTMENTS[boPhanDaLuu]){
