@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V54 - Form sat Header -->
+<!-- Version: V55 - Form giua Header va Footer -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -48,21 +48,29 @@ body.form-scroll-mode .wrap{
     min-height:100dvh;
 }
 body.form-scroll-mode #formContainer{
-    position:relative;
-    width:100%;
-    margin-top:0;
-    padding-top:0;
-    padding-bottom:180px;
-    overflow:visible;
+    /* Form chiem dung vung nam giua Header va Footer. */
+    position:fixed;
+    left:50%;
+    top:var(--form-top,145px);
+    bottom:var(--form-bottom,68px);
+    transform:translateX(-50%);
+    width:min(560px,100vw);
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    display:block!important;
+    z-index:1;
 }
 body.form-scroll-mode #formContainer.active-space{
     padding-top:0;
 }
 body.form-scroll-mode #googleForm{
     width:100%;
-    height:calc(100dvh - var(--form-top,145px) - var(--form-bottom,82px))!important;
-    min-height:70dvh;
+    height:100%!important;
+    min-height:0;
+    border:0;
     border-radius:12px;
+    background:#fff;
     display:block;
     touch-action:pan-y;
 }
@@ -335,21 +343,26 @@ document.body.appendChild(bottomButtons);
 function capNhatKhungForm(){
     const bottomButtons=document.getElementById("bottomButtons");
 
-    // Lay kich thuoc thuc te cua Header/Footer de iframe luon nam dung
-    // trong khoang trong con lai tren moi man hinh.
-    const headerHeight=Math.ceil(appHeader.getBoundingClientRect().height);
+    // Header dang fixed tren dau man hinh.
+    // Form bat dau dung tai mep duoi cua Header.
+    const headerHeight=Math.ceil(
+        appHeader.getBoundingClientRect().height
+    );
+
+    // Footer dang fixed cach day man hinh 14px.
+    // Form ket thuc dung tai mep tren cua Footer.
     const footerHeight=bottomButtons
         ?Math.ceil(bottomButtons.getBoundingClientRect().height)
         :54;
 
     document.documentElement.style.setProperty(
         "--form-top",
-        (headerHeight+8)+"px"
+        headerHeight+"px"
     );
 
     document.documentElement.style.setProperty(
         "--form-bottom",
-        (footerHeight+28)+"px"
+        (footerHeight+14)+"px"
     );
 }
 
