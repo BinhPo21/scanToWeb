@@ -496,7 +496,7 @@ throw new Error("Clipboard rong hoac WebToApp chua cap quyen doc clipboard.");
 }
 
 manualInput.value=text;
-manualInput.focus();
+// Khong tu dong focus de tren dien thoai khong bat ban phim.
 }catch(error){
 console.error(error);
 statusBox.textContent="❌ Không thể đọc nội dung trong bộ nhớ tạm.";
