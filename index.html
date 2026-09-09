@@ -33,6 +33,7 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 #pasteButton,#openButton{flex:1;min-height:46px;border:0;border-radius:9px;color:#fff;font-size:15px;font-weight:600}
 #pasteButton{background:#6b7280}
 #openButton{background:#4f46e5}
+#openButton:disabled{background:#9ca3af;color:#e5e7eb;cursor:not-allowed;opacity:1}
 .info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}
 /* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
 .formbox{display:none;margin-top:12px;padding-bottom:180px}
@@ -109,7 +110,7 @@ body.form-scroll-mode #bottomButtons{
 <input id="manualCode" type="text" autocomplete="off" placeholder="Nhập Mã Lệnh hoặc Chuỗi QR">
 <div class="manual-buttons">
 <button id="pasteButton" type="button">📋 Dán</button>
-<button id="openButton" type="button">Mở Form</button>
+<button id="openButton" type="button" disabled>Mở Form</button>
 </div>
 </div><div class="info">QR 1 mã bỏ qua đối chiếu. QR 5/6 mã đối chiếu với Google Sheet.<br> Mã Lệnh luôn bỏ qua khi cảnh báo.</div></div>
 <div id="formContainer" class="formbox"><iframe id="googleForm" title="Google Form"></iframe><div id="bottomButtons"><button id="btnScanAgain" type="button">🔄 Quét Tờ Lệnh Khác</button><button id="btnHome" type="button">🏠 Bộ Phận</button></div></div>
@@ -121,6 +122,12 @@ const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeI
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar"),departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen"),selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox"),flashButton=document.getElementById("flashButton"),video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox"),imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode"),pasteButton=document.getElementById("pasteButton"),openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm"),btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
 let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false;
+
+function capNhatTrangThaiNutMoForm(){
+const coDuLieu=String(manualInput.value||"").trim().length>0;
+openButton.disabled=!coDuLieu;
+}
+
 const warningModal=document.getElementById("warningModal"),warningMessage=document.getElementById("warningMessage"),warningOk=document.getElementById("warningOk");
 function boScale10(value){
 return String(value??"").replace(/&scale=10/g,"").trim();
@@ -509,6 +516,7 @@ throw new Error("Clipboard rong hoac WebToApp chua cap quyen doc clipboard.");
 }
 
 manualInput.value=text;
+capNhatTrangThaiNutMoForm();
 // Khong tu dong focus de tren dien thoai khong bat ban phim.
 }catch(error){
 console.error(error);
@@ -519,8 +527,12 @@ statusBox.className="status error";
 
 openButton.addEventListener("click",()=>{
 const value=String(manualInput.value||"").trim();
+if(!value)return;
 moGoogleForm(value);
 });
+
+manualInput.addEventListener("input",capNhatTrangThaiNutMoForm);
+capNhatTrangThaiNutMoForm();
 
 manualInput.addEventListener("keydown",e=>{
 if(e.key==="Enter"){
