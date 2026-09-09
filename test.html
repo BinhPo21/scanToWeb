@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V55 - Form giua Header va Footer -->
+<!-- Version: V56 - WebToApp fallback iframe -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -307,6 +307,21 @@ return String(value??"")
     .replace(/'/g,"&#039;");
 }
 
+// WebToApp Android dung NativeBridge.
+// WebView nay co the khong hien Google Form khi iframe nam trong
+// position:fixed + overflow:hidden, vi vay giu layout iframe co dien.
+function laWebToApp(){
+    return !!(window.NativeBridge);
+}
+
+function batCheDoFormScrollNeuHoTro(){
+    if(!laWebToApp()){
+        document.body.classList.add("form-scroll-mode");
+    }else{
+        document.body.classList.remove("form-scroll-mode");
+    }
+}
+
 function moFormSauKhiKiemTra(url){
 googleForm.src=url+"&embedded=true";
 googleForm.style.height="100vh";
@@ -322,7 +337,7 @@ if(bottomButtons){
 
 // CHI khi da quet xong va mo Google Form moi dung single-scroll.
 // Scanner van giu nguyen giao dien va scroll nhu V44.
-document.body.classList.add("form-scroll-mode");
+batCheDoFormScrollNeuHoTro();
 capNhatKhungForm();
 requestAnimationFrame(capNhatKhungForm);
 setTimeout(capNhatKhungForm,100);
@@ -410,7 +425,7 @@ if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
     try{await dungCamera();}catch(_){}
 
     document.body.classList.remove("home-mode");
-    document.body.classList.add("form-scroll-mode");
+    batCheDoFormScrollNeuHoTro();
     document.querySelector(".card").classList.remove("home-mode");
     selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
     appHeader.classList.add("active");
