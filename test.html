@@ -2,13 +2,14 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V57-C - Dung chung che do hien thi Form -->
+<!-- Version: V57-D - Khong tu zoom khi focus input tren iOS -->
 <style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
 h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-align:center;color:#6b7280;font-size:13px}
@@ -27,7 +28,7 @@ body.home-mode{overflow:hidden}.hidden{display:none!important}.department-title{
 .status{margin-top:8px;padding:9px;border-radius:9px;background:#f3f4f6;font-size:13px;text-align:center;word-break:break-word;white-space:pre-wrap}.status.ok{background:#ecfdf5;color:#065f46}.status.error{background:#fef2f2;color:#991b1b}
 #imageScanBox{margin-top:10px}#imageInput{display:none}#imagePicker{display:block;width:100%;min-height:48px;line-height:48px;text-align:center;border-radius:10px;background:#2563eb;color:#fff;font-size:16px;font-weight:700}
 .manual{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px}.manual-label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
-input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-radius:9px;font-size:16px}
+input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-radius:9px;font-size:16px!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .manual-buttons{display:flex;gap:8px;margin-top:8px}
 #pasteButton,#openButton{flex:1;min-height:46px;border:0;border-radius:9px;color:#fff;font-size:15px;font-weight:600}
 #pasteButton{background:#6b7280}
