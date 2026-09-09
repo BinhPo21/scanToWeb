@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V57-D - Khong tu zoom khi focus input tren iOS -->
+<!-- Version: V57-F - Man quet QR co dinh, khong scroll -->
 <style>
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
@@ -78,6 +78,72 @@ body.form-scroll-mode #googleForm{
 }
 body.form-scroll-mode #bottomButtons{
     z-index:99999;
+}
+
+/* V57-F: Man quet QR luon nam gon trong man hinh, khong cho trang ngoai scroll. */
+body.scanner-mode{
+    overflow:hidden;
+    height:100dvh;
+}
+body.scanner-mode .wrap{
+    height:100dvh;
+    overflow:hidden;
+    padding:0;
+}
+body.scanner-mode #scannerScreen.active-space{
+    position:fixed;
+    left:50%;
+    top:var(--scanner-top,145px);
+    bottom:6px;
+    transform:translateX(-50%);
+    width:min(560px,calc(100vw - 24px));
+    margin:0;
+    padding:8px 0 0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:2;
+}
+body.scanner-mode .camera{
+    height:clamp(220px,calc(100dvh - var(--scanner-top,145px) - 280px),440px);
+    flex:0 0 auto;
+}
+body.scanner-mode .camera-controls{
+    margin-top:5px;
+}
+body.scanner-mode .flash-button{
+    min-height:38px;
+}
+body.scanner-mode .status{
+    margin-top:5px;
+    padding:6px;
+}
+body.scanner-mode #imageScanBox{
+    margin-top:6px;
+}
+body.scanner-mode #imagePicker{
+    min-height:42px;
+    line-height:42px;
+}
+body.scanner-mode .manual{
+    margin-top:6px;
+    padding-top:6px;
+}
+body.scanner-mode .manual-label{
+    margin-bottom:4px;
+}
+body.scanner-mode input[type=text]{
+    min-height:42px;
+}
+body.scanner-mode .manual-buttons{
+    margin-top:6px;
+}
+body.scanner-mode #pasteButton,
+body.scanner-mode #openButton{
+    min-height:42px;
+}
+body.scanner-mode .info{
+    margin-top:6px;
 }
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100000}
@@ -321,6 +387,7 @@ function batCheDoFormScrollNeuHoTro(){
 }
 
 function moFormSauKhiKiemTra(url){
+document.body.classList.remove("scanner-mode");
 googleForm.src=url+"&embedded=true";
 googleForm.style.height="100vh";
 formContainer.style.display="block";
@@ -379,6 +446,11 @@ function capNhatKhungForm(){
     );
 }
 
+function capNhatKhungQuet(){
+    const headerHeight=Math.ceil(appHeader.getBoundingClientRect().height);
+    document.documentElement.style.setProperty("--scanner-top",headerHeight+"px");
+}
+
 async function chonBoPhan(boPhan){
 if(!DEPARTMENTS[boPhan])return;
 
@@ -420,6 +492,7 @@ btnScanAgain.addEventListener("click",function(event){
     },100);
 },true);
 if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
+    document.body.classList.remove("scanner-mode");
     try{await dungCamera();}catch(_){}
 
     document.body.classList.remove("home-mode");
@@ -463,6 +536,7 @@ btnScanAgain.innerHTML="🔄 Quét Tờ Lệnh Khác";
 btnHome.style.flex="";
 
 document.body.classList.remove("form-scroll-mode");
+document.body.classList.add("scanner-mode");
 document.body.classList.remove("home-mode");
 document.querySelector(".card").classList.remove("home-mode");
 selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
@@ -472,6 +546,8 @@ departmentScreen.classList.add("hidden");
 scannerScreen.classList.remove("hidden");
 scannerScreen.classList.add("active-space");
 formContainer.classList.remove("active-space");
+capNhatKhungQuet();
+requestAnimationFrame(capNhatKhungQuet);
 daQuet=false;
 statusBox.textContent="📷 Đang mở camera...";
 statusBox.className="status";
@@ -484,10 +560,16 @@ window.addEventListener("resize",()=>{
     if(document.body.classList.contains("form-scroll-mode")){
         capNhatKhungForm();
     }
+    if(document.body.classList.contains("scanner-mode")){
+        capNhatKhungQuet();
+    }
 });
 window.addEventListener("orientationchange",()=>{
     if(document.body.classList.contains("form-scroll-mode")){
         setTimeout(capNhatKhungForm,150);
+    }
+    if(document.body.classList.contains("scanner-mode")){
+        setTimeout(capNhatKhungQuet,150);
     }
 });
 
@@ -547,10 +629,12 @@ if(bottomButtons)bottomButtons.style.display="none";
 
 googleForm.src="";
 
-// Quay lai man quet QR thi tra lai scroll binh thuong.
+// Quay lai man quet QR: khoa trang ngoai, giu toan bo giao dien quet co dinh.
 document.body.classList.remove("form-scroll-mode");
+document.body.classList.add("scanner-mode");
+capNhatKhungQuet();
 
-formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
+formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");capNhatKhungQuet();requestAnimationFrame(capNhatKhungQuet);cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
 async function veChonBoPhan(){
 try{
