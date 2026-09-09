@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V57-A - WebToApp bo padding-top Form -->
+<!-- Version: V57-B - WebToApp dynamic spacer iframe -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -27,16 +27,28 @@ body.home-mode{overflow:hidden}.hidden{display:none!important}.department-title{
     padding-top:145px;
 }
 
-/* Form tren trinh duyet binh thuong */
+/* Trinh duyet thuong giu nguyen giao dien V56. */
 .formbox.active-space{
     padding-top:145px;
 }
 
-/* V57-A:
-   WebToApp khong dung padding-top 145px cho Form.
-   Android WebView co the day iframe xuong tao khoang trang lon. */
+/* =========================================================
+   V57-B - WebToApp Android WebView
+   Khong dung position:fixed cho iframe de tranh loi trang trang.
+   Form van nam trong luong trang, nhung khoang tren duoc tinh
+   dong theo chieu cao that cua Header.
+   ========================================================= */
 body.webtoapp-mode .formbox.active-space{
-    padding-top:0 !important;
+    margin-top:0 !important;
+    padding-top:var(--form-top,145px) !important;
+    padding-bottom:calc(var(--form-bottom,68px) + 14px) !important;
+}
+
+body.webtoapp-mode #googleForm{
+    width:100%;
+    height:calc(100dvh - var(--form-top,145px) - var(--form-bottom,68px)) !important;
+    min-height:0 !important;
+    display:block;
 }
 .camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}#video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
 .camera-controls{display:flex;gap:8px;margin-top:8px}.flash-button{flex:1;min-height:44px;border:0;border-radius:10px;background:#374151;color:#fff;font-size:14px;font-weight:700}.flash-button.on{background:#f59e0b;color:#111827}
@@ -333,8 +345,7 @@ function laWebToApp(){
 }
 
 function danhDauCheDoWebToApp(){
-
-    // Danh dau moi truong de CSS xu ly rieng cho WebToApp.
+    // Tao class rieng de CSS xu ly dung cho Android WebToApp.
     if(laWebToApp()){
         document.body.classList.add("webtoapp-mode");
     }else{
@@ -511,12 +522,19 @@ await khoiDong();
 
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
 window.addEventListener("resize",()=>{
-    if(document.body.classList.contains("form-scroll-mode")){
+    if(
+        document.body.classList.contains("form-scroll-mode") ||
+        document.body.classList.contains("webtoapp-mode")
+    ){
         capNhatKhungForm();
     }
 });
+
 window.addEventListener("orientationchange",()=>{
-    if(document.body.classList.contains("form-scroll-mode")){
+    if(
+        document.body.classList.contains("form-scroll-mode") ||
+        document.body.classList.contains("webtoapp-mode")
+    ){
         setTimeout(capNhatKhungForm,150);
     }
 });
@@ -600,7 +618,7 @@ await chonBoPhan(button.dataset.department);
 
 document.addEventListener("DOMContentLoaded",async()=>{
 
-// Danh dau dang chay trong WebToApp hay trinh duyet thuong.
+// Danh dau moi truong ngay tu dau de WebToApp dung CSS V57-B.
 danhDauCheDoWebToApp();
 
 try{
