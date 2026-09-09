@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V50 - Them nut Gui Lenh Khac cho Thanh V va Giay To Ong -->
+<!-- Version: V43 -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -40,42 +40,6 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
 
-/* Thanh V: khoa scroll trang ngoai, chi Google Form trong iframe duoc cuon. */
-body.thanh-v-mode{
-    height:100dvh;
-    min-height:0;
-    overflow:hidden;
-    overscroll-behavior:none;
-}
-body.thanh-v-mode .wrap{
-    height:100dvh;
-    padding:0;
-}
-body.thanh-v-mode #formContainer{
-    position:fixed;
-    left:50%;
-    top:var(--thanh-v-top,145px);
-    bottom:var(--thanh-v-bottom,82px);
-    transform:translateX(-50%);
-    width:min(560px,100vw);
-    margin:0;
-    padding:0;
-    display:block!important;
-    overflow:hidden;
-    z-index:1;
-}
-body.thanh-v-mode #googleForm{
-    width:100%;
-    height:100%!important;
-    min-height:0;
-    border-radius:0;
-    display:block;
-    touch-action:pan-y;
-}
-body.thanh-v-mode #bottomButtons{
-    z-index:99999;
-}
-
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100000}
 .modal-box{width:min(430px,100%);background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
 .modal-title{margin:0 0 12px;font-size:19px;font-weight:700;color:#991b1b;text-align:center}
@@ -100,7 +64,7 @@ body.thanh-v-mode #bottomButtons{
 </div>
 <main class="wrap"><section class="card home-mode">
 <div id="appHeader" class="app-header"><h1>📷 Quét QR Tờ Lệnh 3/2</h1><p class="sub">Chọn bộ phận → Quét QR → tự điền Google Form</p><div id="departmentBar" class="department-bar hidden"><div id="selectedDepartment" class="selected-department"></div><button id="changeDepartment" class="change-department" type="button">🔄 Bộ Phận</button></div></div>
-<div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button><button class="department-button" data-department="Thanh V">📝 THANH V</button><button class="department-button" data-department="Giấy Tổ Ong">🐝 GIẤY TỔ ONG</button></div></div>
+<div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button><button class="department-button" data-department="Thanh V">📝 THANH V</button></div></div>
 <div id="scannerScreen" class="hidden"><div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div><div class="camera-controls"><button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button></div><div id="status" class="status">Đang tải bộ quét QR...</div><div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ Chọn Ảnh Quét QR</label></div><div class="manual" id="manualBox">
 <label class="manual-label" for="manualCode">Nhập mã QR nếu cần</label>
 <input id="manualCode" type="text" autocomplete="off" placeholder="Dán chuỗi QR vào đây">
@@ -114,7 +78,7 @@ body.thanh-v-mode #bottomButtons{
 <script src="google-sheet-API.js"></script>
 <script type="module">
 import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/+esm";
-const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform","Thanh V":"https://docs.google.com/forms/d/e/1FAIpQLSdMGu0cHh7d0oF0cwkD8WB_TCahiMz9FVYC4PHEsX3mw2CgHg/viewform","Giấy Tổ Ong":"https://docs.google.com/forms/d/10O2zXGVIvi_fmuvNFBtuDrFBdvtINs_QvlNYv3YHYBU/viewform"};
+const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform","Thanh V":"https://docs.google.com/forms/d/e/1FAIpQLSdMGu0cHh7d0oF0cwkD8WB_TCahiMz9FVYC4PHEsX3mw2CgHg/viewform"};
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar"),departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen"),selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox"),flashButton=document.getElementById("flashButton"),video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox"),imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode"),pasteButton=document.getElementById("pasteButton"),openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm"),btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
 let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false;
@@ -318,12 +282,7 @@ if(bottomButtons){
     btnHome.style.flex="";
 }
 
-// CHI khi da quet xong va mo Google Form moi dung single-scroll.
-// Scanner van giu nguyen giao dien va scroll nhu V44.
-document.body.classList.add("thanh-v-mode");
-capNhatKhungThanhV();
-requestAnimationFrame(capNhatKhungThanhV);
-setTimeout(capNhatKhungThanhV,100);
+formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function damBaoHeaderFooterCoDinh(){
 // Dua Header va Footer ra truc tiep body.
@@ -338,27 +297,6 @@ document.body.appendChild(bottomButtons);
 }
 }
 
-function capNhatKhungThanhV(){
-    const bottomButtons=document.getElementById("bottomButtons");
-
-    // Lay kich thuoc thuc te cua Header/Footer de iframe luon nam dung
-    // trong khoang trong con lai tren moi man hinh.
-    const headerHeight=Math.ceil(appHeader.getBoundingClientRect().height);
-    const footerHeight=bottomButtons
-        ?Math.ceil(bottomButtons.getBoundingClientRect().height)
-        :54;
-
-    document.documentElement.style.setProperty(
-        "--thanh-v-top",
-        (headerHeight+8)+"px"
-    );
-
-    document.documentElement.style.setProperty(
-        "--thanh-v-bottom",
-        (footerHeight+28)+"px"
-    );
-}
-
 async function chonBoPhan(boPhan){
 if(!DEPARTMENTS[boPhan])return;
 
@@ -371,41 +309,13 @@ try{
 localStorage.setItem("boPhanGanNhat",boPhanDangChon);
 }catch(_){}
 
-// Thanh V va Giay To Ong khong quet QR. Mo truc tiep Google Form dang nhung.
-const BO_PHAN_KHONG_QUET_QR=["Thanh V","Giấy Tổ Ong"];
-
-function taoLinkFormEmbedded(url){
-    const u=new URL(url);
-    u.searchParams.set("embedded","true");
-    return u.toString();
-}
-
-// Nut trai: chi doi thanh Gui Lenh Khac voi Thanh V va Giay To Ong.
-// Dung capture de khong anh huong handler Quet To Lenh Khac cua cac bo phan khac.
-btnScanAgain.addEventListener("click",function(event){
-    const boPhanKhongQuet=["Thanh V","Giấy Tổ Ong"];
-
-    if(!boPhanKhongQuet.includes(boPhanDangChon)){
-        return;
-    }
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    googleForm.src="about:blank";
-
-    setTimeout(function(){
-        googleForm.src=taoLinkFormEmbedded(DEPARTMENTS[boPhanDangChon]);
-        window.scrollTo({top:0,behavior:"smooth"});
-    },100);
-},true);
-if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
+// Thanh V khong quet QR. Mo truc tiep Google Form dang nhung.
+if(boPhanDangChon==="Thanh V"){
     try{await dungCamera();}catch(_){}
 
     document.body.classList.remove("home-mode");
-    document.body.classList.add("thanh-v-mode");
     document.querySelector(".card").classList.remove("home-mode");
-    selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
+    selectedDepartment.textContent="Bộ phận: Thanh V";
     appHeader.classList.add("active");
     departmentBar.classList.remove("hidden");
     departmentScreen.classList.add("hidden");
@@ -413,36 +323,27 @@ if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
     formContainer.classList.add("active-space");
     daQuet=true;
 
-    googleForm.src=taoLinkFormEmbedded(DEPARTMENTS[boPhanDangChon]);
+    googleForm.src=DEPARTMENTS["Thanh V"]+"?embedded=true";
+    googleForm.style.height="100vh";
     formContainer.style.display="block";
 
-    // Thanh V va Giay To Ong: hien nut Gui Lenh Khac de tai lai form moi.
+    // Thanh V chi co nut doi bo phan, khong co nut Quet To Lenh Khac.
     const bottomButtons=document.getElementById("bottomButtons");
     if(bottomButtons){
         bottomButtons.style.display="flex";
-        btnScanAgain.style.display="block";
-        btnScanAgain.style.flex="1";
-        btnScanAgain.innerHTML="📝 Gửi Lệnh Khác";
+        btnScanAgain.style.display="none";
         btnHome.style.display="block";
         btnHome.style.flex="1";
     }
 
-    // Chi con 1 vung scroll: Google Form trong iframe.
-    // Trang web ben ngoai duoc khoa scroll de tranh xung dot khi vuot.
-    capNhatKhungThanhV();
-    requestAnimationFrame(capNhatKhungThanhV);
-    setTimeout(capNhatKhungThanhV,100);
-
+    formContainer.scrollIntoView({behavior:"smooth",block:"start"});
     return;
 }
 
 // Cac bo phan khac quay lai giao dien quet QR binh thuong.
 btnScanAgain.style.display="";
-btnScanAgain.style.flex="";
-btnScanAgain.innerHTML="🔄 Quét Tờ Lệnh Khác";
 btnHome.style.flex="";
 
-document.body.classList.remove("thanh-v-mode");
 document.body.classList.remove("home-mode");
 document.querySelector(".card").classList.remove("home-mode");
 selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
@@ -460,17 +361,6 @@ await khoiDong();
 }
 
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
-window.addEventListener("resize",()=>{
-    if(document.body.classList.contains("thanh-v-mode")){
-        capNhatKhungThanhV();
-    }
-});
-window.addEventListener("orientationchange",()=>{
-    if(document.body.classList.contains("thanh-v-mode")){
-        setTimeout(capNhatKhungThanhV,150);
-    }
-});
-
 document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="hidden"){dungStreamCamera();return}if(document.visibilityState==="visible"){const dangQuet=!scannerScreen.classList.contains("hidden");if(dangQuet&&!daQuet){try{await khoiDong()}catch(_){}}}});
 window.addEventListener("pagehide",dungStreamCamera);window.addEventListener("beforeunload",dungStreamCamera);
 async function khoiDong(){try{if(!window.isSecureContext)throw new Error("Trang phải chạy bằng HTTPS.");if(controls&&videoTrack&&videoTrack.readyState==="live"){cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";return}statusBox.textContent="Đang xin quyền Camera...";statusBox.className="status";reader=reader||new BrowserQRCodeReader();controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}},video,function(result){if(result)xuLyMaQuet(result.getText())});const stream=video.srcObject;videoTrack=stream&&stream.getVideoTracks?stream.getVideoTracks()[0]:null;const capabilities=videoTrack&&videoTrack.getCapabilities?videoTrack.getCapabilities():{};if(capabilities&&capabilities.torch===true){flashButton.style.display="block";flashButton.disabled=false;flashButton.style.opacity="1";flashButton.textContent="🔦 BẬT FLASH"}else flashButton.style.display="none";statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status"}catch(e){console.error(e);statusBox.textContent="Không khởi động được Camera: "+(e.message||e);statusBox.className="status error"}}
@@ -496,7 +386,7 @@ throw new Error("Clipboard rong hoac WebToApp chua cap quyen doc clipboard.");
 }
 
 manualInput.value=text;
-// Khong tu dong focus de tren dien thoai khong bat ban phim.
+manualInput.focus();
 }catch(error){
 console.error(error);
 statusBox.textContent="❌ Không thể đọc nội dung trong bộ nhớ tạm.";
@@ -521,10 +411,6 @@ const bottomButtons=document.getElementById("bottomButtons");
 if(bottomButtons)bottomButtons.style.display="none";
 
 googleForm.src="";
-
-// Quay lai man quet QR thi tra lai scroll binh thuong.
-document.body.classList.remove("thanh-v-mode");
-
 formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
 async function veChonBoPhan(){
