@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V47 - Thanh V + Giay To Ong single-scroll mode -->
+<!-- Version: V48 - Sua loi load iframe Giay To Ong -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -373,6 +373,12 @@ localStorage.setItem("boPhanGanNhat",boPhanDangChon);
 
 // Thanh V va Giay To Ong khong quet QR. Mo truc tiep Google Form dang nhung.
 const BO_PHAN_KHONG_QUET_QR=["Thanh V","Giấy Tổ Ong"];
+
+function taoLinkFormEmbedded(url){
+    const u=new URL(url);
+    u.searchParams.set("embedded","true");
+    return u.toString();
+}
 if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
     try{await dungCamera();}catch(_){}
 
@@ -387,7 +393,7 @@ if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
     formContainer.classList.add("active-space");
     daQuet=true;
 
-    googleForm.src=DEPARTMENTS[boPhanDangChon]+"?embedded=true";
+    googleForm.src=taoLinkFormEmbedded(DEPARTMENTS[boPhanDangChon]);
     formContainer.style.display="block";
 
     // Bo phan khong quet QR chi co nut doi bo phan.
