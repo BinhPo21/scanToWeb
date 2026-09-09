@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V45 - All departments single-scroll mode -->
+<!-- Version: V44 - Thanh V single-scroll mode -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -40,22 +40,22 @@ input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5d
 #btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 #btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
 
-/* Tat ca bo phan: khoa scroll trang ngoai, chi Google Form trong iframe duoc cuon. */
-body.form-mode{
+/* Thanh V: khoa scroll trang ngoai, chi Google Form trong iframe duoc cuon. */
+body.thanh-v-mode{
     height:100dvh;
     min-height:0;
     overflow:hidden;
     overscroll-behavior:none;
 }
-body.form-mode .wrap{
+body.thanh-v-mode .wrap{
     height:100dvh;
     padding:0;
 }
-body.form-mode #formContainer{
+body.thanh-v-mode #formContainer{
     position:fixed;
     left:50%;
-    top:var(--form-top,145px);
-    bottom:var(--form-bottom,82px);
+    top:var(--thanh-v-top,145px);
+    bottom:var(--thanh-v-bottom,82px);
     transform:translateX(-50%);
     width:min(560px,100vw);
     margin:0;
@@ -64,7 +64,7 @@ body.form-mode #formContainer{
     overflow:hidden;
     z-index:1;
 }
-body.form-mode #googleForm{
+body.thanh-v-mode #googleForm{
     width:100%;
     height:100%!important;
     min-height:0;
@@ -72,7 +72,7 @@ body.form-mode #googleForm{
     display:block;
     touch-action:pan-y;
 }
-body.form-mode #bottomButtons{
+body.thanh-v-mode #bottomButtons{
     z-index:99999;
 }
 
@@ -318,10 +318,6 @@ if(bottomButtons){
     btnHome.style.flex="";
 }
 
-capNhatKhungForm();
-requestAnimationFrame(capNhatKhungForm);
-setTimeout(capNhatKhungForm,100);
-
 formContainer.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function damBaoHeaderFooterCoDinh(){
@@ -337,7 +333,7 @@ document.body.appendChild(bottomButtons);
 }
 }
 
-function capNhatKhungForm(){
+function capNhatKhungThanhV(){
     const bottomButtons=document.getElementById("bottomButtons");
 
     // Lay kich thuoc thuc te cua Header/Footer de iframe luon nam dung
@@ -348,12 +344,12 @@ function capNhatKhungForm(){
         :54;
 
     document.documentElement.style.setProperty(
-        "--form-top",
+        "--thanh-v-top",
         (headerHeight+8)+"px"
     );
 
     document.documentElement.style.setProperty(
-        "--form-bottom",
+        "--thanh-v-bottom",
         (footerHeight+28)+"px"
     );
 }
@@ -375,7 +371,7 @@ if(boPhanDangChon==="Thanh V"){
     try{await dungCamera();}catch(_){}
 
     document.body.classList.remove("home-mode");
-    document.body.classList.add("form-mode");
+    document.body.classList.add("thanh-v-mode");
     document.querySelector(".card").classList.remove("home-mode");
     selectedDepartment.textContent="Bộ phận: Thanh V";
     appHeader.classList.add("active");
@@ -399,9 +395,9 @@ if(boPhanDangChon==="Thanh V"){
 
     // Thanh V chi con 1 vung scroll: Google Form trong iframe.
     // Trang web ben ngoai duoc khoa scroll de tranh xung dot khi vuot.
-    capNhatKhungForm();
-    requestAnimationFrame(capNhatKhungForm);
-    setTimeout(capNhatKhungForm,100);
+    capNhatKhungThanhV();
+    requestAnimationFrame(capNhatKhungThanhV);
+    setTimeout(capNhatKhungThanhV,100);
 
     return;
 }
@@ -410,8 +406,8 @@ if(boPhanDangChon==="Thanh V"){
 btnScanAgain.style.display="";
 btnHome.style.flex="";
 
+document.body.classList.remove("thanh-v-mode");
 document.body.classList.remove("home-mode");
-document.body.classList.add("form-mode");
 document.querySelector(".card").classList.remove("home-mode");
 selectedDepartment.textContent="Bộ phận: "+boPhanDangChon;
 appHeader.classList.add("active");
@@ -429,13 +425,13 @@ await khoiDong();
 
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
 window.addEventListener("resize",()=>{
-    if(document.body.classList.contains("form-mode")){
-        capNhatKhungForm();
+    if(document.body.classList.contains("thanh-v-mode")){
+        capNhatKhungThanhV();
     }
 });
 window.addEventListener("orientationchange",()=>{
-    if(document.body.classList.contains("form-mode")){
-        setTimeout(capNhatKhungForm,150);
+    if(document.body.classList.contains("thanh-v-mode")){
+        setTimeout(capNhatKhungThanhV,150);
     }
 });
 
