@@ -7,7 +7,7 @@
 <title>Quét QR Tờ Lệnh 3/2</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<!-- Version: V57-B - WebToApp dynamic spacer iframe -->
+<!-- Version: V57-C - Dung chung che do hien thi Form -->
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -19,37 +19,7 @@ body.home-mode{overflow:hidden}.hidden{display:none!important}.department-title{
 .app-header.active h1{font-size:22px;margin:0 0 3px}.app-header.active .sub{margin:0 0 8px}.department-bar{display:flex;gap:8px;align-items:center}
 .selected-department{flex:1;margin:0;padding:10px;border-radius:10px;background:#eef2ff;color:#3730a3;text-align:center;font-weight:700}
 .change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
-#scannerScreen{
-    padding-top:10px;
-}
-
-#scannerScreen.active-space{
-    padding-top:145px;
-}
-
-/* Trinh duyet thuong giu nguyen giao dien V56. */
-.formbox.active-space{
-    padding-top:145px;
-}
-
-/* =========================================================
-   V57-B - WebToApp Android WebView
-   Khong dung position:fixed cho iframe de tranh loi trang trang.
-   Form van nam trong luong trang, nhung khoang tren duoc tinh
-   dong theo chieu cao that cua Header.
-   ========================================================= */
-body.webtoapp-mode .formbox.active-space{
-    margin-top:0 !important;
-    padding-top:var(--form-top,145px) !important;
-    padding-bottom:calc(var(--form-bottom,68px) + 14px) !important;
-}
-
-body.webtoapp-mode #googleForm{
-    width:100%;
-    height:calc(100dvh - var(--form-top,145px) - var(--form-bottom,68px)) !important;
-    min-height:0 !important;
-    display:block;
-}
+#scannerScreen{padding-top:10px}#scannerScreen.active-space{padding-top:145px}.formbox.active-space{padding-top:145px}
 .camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}#video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
 .camera-controls{display:flex;gap:8px;margin-top:8px}.flash-button{flex:1;min-height:44px;border:0;border-radius:10px;background:#374151;color:#fff;font-size:14px;font-weight:700}.flash-button.on{background:#f59e0b;color:#111827}
 .scan-box{position:absolute;left:50%;top:50%;width:min(72vw,330px);height:min(72vw,330px);transform:translate(-50%,-50%);border:4px solid #fff;border-radius:4px;pointer-events:none}
@@ -337,28 +307,9 @@ return String(value??"")
     .replace(/'/g,"&#039;");
 }
 
-// WebToApp Android dung NativeBridge.
-// WebView nay co the khong hien Google Form khi iframe nam trong
-// position:fixed + overflow:hidden, vi vay giu layout iframe co dien.
-function laWebToApp(){
-    return !!(window.NativeBridge);
-}
-
-function danhDauCheDoWebToApp(){
-    // Tao class rieng de CSS xu ly dung cho Android WebToApp.
-    if(laWebToApp()){
-        document.body.classList.add("webtoapp-mode");
-    }else{
-        document.body.classList.remove("webtoapp-mode");
-    }
-}
-
+// Tat ca trinh duyet va WebView deu dung chung mot che do hien thi Form.
 function batCheDoFormScrollNeuHoTro(){
-    if(!laWebToApp()){
-        document.body.classList.add("form-scroll-mode");
-    }else{
-        document.body.classList.remove("form-scroll-mode");
-    }
+    document.body.classList.add("form-scroll-mode");
 }
 
 function moFormSauKhiKiemTra(url){
@@ -522,19 +473,12 @@ await khoiDong();
 
 function dungStreamCamera(){try{if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)videoTrack.applyConstraints({advanced:[{torch:false}]}).catch(()=>{})}catch(_){} }const stream=video.srcObject;if(stream&&stream.getTracks)stream.getTracks().forEach(track=>{try{track.stop()}catch(_){}});video.srcObject=null;if(controls){try{controls.stop()}catch(_){}controls=null}videoTrack=null;flashDangBat=false;if(flashButton){flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}}catch(_){} }
 window.addEventListener("resize",()=>{
-    if(
-        document.body.classList.contains("form-scroll-mode") ||
-        document.body.classList.contains("webtoapp-mode")
-    ){
+    if(document.body.classList.contains("form-scroll-mode")){
         capNhatKhungForm();
     }
 });
-
 window.addEventListener("orientationchange",()=>{
-    if(
-        document.body.classList.contains("form-scroll-mode") ||
-        document.body.classList.contains("webtoapp-mode")
-    ){
+    if(document.body.classList.contains("form-scroll-mode")){
         setTimeout(capNhatKhungForm,150);
     }
 });
@@ -617,10 +561,6 @@ await chonBoPhan(button.dataset.department);
 }));
 
 document.addEventListener("DOMContentLoaded",async()=>{
-
-// Danh dau moi truong ngay tu dau de WebToApp dung CSS V57-B.
-danhDauCheDoWebToApp();
-
 try{
 const boPhanDaLuu=localStorage.getItem("boPhanGanNhat");
 if(boPhanDaLuu&&DEPARTMENTS[boPhanDaLuu]){
