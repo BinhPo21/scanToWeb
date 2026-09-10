@@ -1,0 +1,240 @@
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+.wrap{width:min(560px,100%);margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 3px 14px rgba(0,0,0,.08)}
+h1{margin:0 0 5px;font-size:22px;text-align:center}.sub{margin:0 0 12px;text-align:center;color:#6b7280;font-size:13px}
+.card.home-mode{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;margin:0}
+body.home-mode{overflow:hidden}.hidden{display:none!important}.department-title{text-align:center;font-size:17px;font-weight:700;margin:14px 0 10px}
+.department-grid{display:grid;gap:10px}.department-button{width:100%;min-height:58px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:17px;font-weight:700}
+.app-header.active{position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 24px));padding:10px 14px 8px;background:#fff;border-radius:0 0 14px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);z-index:99998}
+.app-header.active h1{font-size:22px;margin:0 0 3px}.app-header.active .sub{margin:0 0 8px}.department-bar{display:flex;gap:8px;align-items:center}
+.selected-department{flex:1;margin:0;padding:10px;border-radius:10px;background:#eef2ff;color:#3730a3;text-align:center;font-weight:700}
+.change-department{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#6b7280;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
+#scannerScreen{padding-top:10px}#scannerScreen.active-space{padding-top:145px}.formbox.active-space{padding-top:145px}
+.camera{width:100%;height:440px;position:relative;overflow:hidden;border-radius:12px;background:#111}#video{width:100%;height:100%;display:block;object-fit:cover;background:#111}
+.camera-controls{display:flex;gap:8px;margin-top:8px}.flash-button{flex:1;min-height:44px;border:0;border-radius:10px;background:#374151;color:#fff;font-size:14px;font-weight:700}.flash-button.on{background:#f59e0b;color:#111827}
+.scan-box{position:absolute;left:50%;top:50%;width:min(72vw,330px);height:min(72vw,330px);transform:translate(-50%,-50%);border:4px solid #fff;border-radius:4px;pointer-events:none}
+.scan-box:before,.scan-box:after{content:"";position:absolute;width:70px;height:70px;border-color:#fff;border-style:solid}.scan-box:before{left:-4px;top:-4px;border-width:7px 0 0 7px}.scan-box:after{right:-4px;bottom:-4px;border-width:0 7px 7px 0}
+.status{margin-top:8px;padding:9px;border-radius:9px;background:#f3f4f6;font-size:13px;text-align:center;word-break:break-word;white-space:pre-wrap}.status.ok{background:#ecfdf5;color:#065f46}.status.error{background:#fef2f2;color:#991b1b}
+#imageScanBox{margin-top:10px}#imageInput{display:none}#imagePicker{display:block;width:100%;min-height:48px;line-height:48px;text-align:center;border-radius:10px;background:#2563eb;color:#fff;font-size:16px;font-weight:700}
+.manual{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px}.manual-label{display:block;margin-bottom:6px;font-weight:600;font-size:13px}
+input[type=text]{width:100%;min-height:46px;padding:10px;border:1px solid #d1d5db;border-radius:9px;font-size:16px!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.manual-buttons{display:flex;gap:8px;margin-top:8px}
+#pasteButton,#openButton{flex:1;min-height:46px;border:0;border-radius:9px;color:#fff;font-size:15px;font-weight:600}
+#pasteButton{background:#6b7280}
+#openButton{background:#4f46e5}
+#openButton:disabled{background:#9ca3af;color:#e5e7eb;cursor:not-allowed;opacity:1}
+.info{margin-top:10px;font-size:11px;color:#6b7280;text-align:center}
+/* Them khoang trong duoi Form de nut co dinh khong che popup cua Google Forms. */
+.formbox{display:none;margin-top:12px;padding-bottom:180px}
+#googleForm{width:100%;min-height:80dvh;height:100%;border:0;border-radius:12px;background:#fff;display:block;overflow:hidden}
+#bottomButtons{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 28px));z-index:99999;display:none;gap:8px}
+#btnScanAgain,#btnHome{min-height:54px;border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.28)}
+#btnScanAgain{flex:1;background:#16a34a}#btnHome{width:125px;background:#6b7280}
+
+/* V52: che do form scroll nhe, uu tien tuong thich Android WebView. */
+body.form-scroll-mode{
+    overflow:hidden;
+}
+body.form-scroll-mode .wrap{
+    min-height:100dvh;
+}
+body.form-scroll-mode #formContainer{
+    /* Form chiem dung vung nam giua Header va Footer. */
+    position:fixed;
+    left:50%;
+    top:var(--form-top,145px);
+    bottom:var(--form-bottom,68px);
+    transform:translateX(-50%);
+    width:min(560px,100vw);
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    display:block!important;
+    z-index:1;
+}
+body.form-scroll-mode #formContainer.active-space{
+    padding-top:0;
+}
+body.form-scroll-mode #googleForm{
+    width:100%;
+    height:100%!important;
+    min-height:0;
+    border:0;
+    border-radius:12px;
+    background:#fff;
+    display:block;
+    touch-action:pan-y;
+}
+body.form-scroll-mode #bottomButtons{
+    z-index:99999;
+}
+
+/* V57-F: Man quet QR luon nam gon trong man hinh, khong cho trang ngoai scroll. */
+body.scanner-mode{
+    overflow:hidden;
+    height:100dvh;
+}
+body.scanner-mode .wrap{
+    height:100dvh;
+    overflow:hidden;
+    padding:0;
+}
+body.scanner-mode #scannerScreen.active-space{
+    position:fixed;
+    left:50%;
+    top:var(--scanner-top,145px);
+    bottom:6px;
+    transform:translateX(-50%);
+    width:min(560px,calc(100vw - 24px));
+    margin:0;
+    padding:8px 0 0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:2;
+}
+body.scanner-mode .camera{
+    height:clamp(220px,calc(100dvh - var(--scanner-top,145px) - 280px),440px);
+    flex:0 0 auto;
+}
+body.scanner-mode .camera-controls{
+    margin-top:5px;
+}
+body.scanner-mode .flash-button{
+    min-height:38px;
+}
+body.scanner-mode .status{
+    margin-top:5px;
+    padding:6px;
+}
+body.scanner-mode #imageScanBox{
+    margin-top:6px;
+}
+body.scanner-mode #imagePicker{
+    min-height:42px;
+    line-height:42px;
+}
+body.scanner-mode .manual{
+    margin-top:6px;
+    padding-top:6px;
+}
+body.scanner-mode .manual-label{
+    margin-bottom:4px;
+}
+body.scanner-mode input[type=text]{
+    min-height:42px;
+}
+body.scanner-mode .manual-buttons{
+    margin-top:6px;
+}
+body.scanner-mode #pasteButton,
+body.scanner-mode #openButton{
+    min-height:42px;
+}
+body.scanner-mode .info{
+    margin-top:6px;
+}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100000}
+.modal-box{width:min(430px,100%);background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.modal-title{margin:0 0 12px;font-size:19px;font-weight:700;color:#991b1b;text-align:center}
+.modal-message{font-size:16px;line-height:1.5;text-align:left;white-space:normal;color:#111827}
+.warning-item{margin-top:14px;padding-top:12px;border-top:1px solid #e5e7eb}
+.warning-item:first-child{margin-top:0;padding-top:0;border-top:0}
+.warning-name{font-weight:700;color:#b91c1c;margin-bottom:5px}
+.warning-value{font-size:14px;line-height:1.55;word-break:break-word}
+.warning-label{font-weight:700;color:#374151}
+.warning-arrow{padding:0 4px;color:#6b7280}
+.modal-ok{display:block;width:100%;margin-top:18px;min-height:48px;border:0;border-radius:10px;background:#4f46e5;color:#fff;font-size:16px;font-weight:700}
+
+
+/* V57: Popup nhap Ma Lenh noi. Giao dien quet phia sau duoc khoa vi tri. */
+#manualCode{cursor:text}
+
+.manual-popup-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100001;
+    background:rgba(0,0,0,.38);
+    pointer-events:auto;
+}
+
+.manual-popup{
+    position:absolute;
+    left:12px;
+    right:12px;
+    width:auto;
+    max-width:560px;
+    margin:auto;
+    padding:18px;
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 12px 36px rgba(0,0,0,.28);
+}
+
+.manual-popup-title{
+    margin-bottom:14px;
+    font-size:17px;
+    font-weight:700;
+    color:#1f2937;
+}
+
+.manual-popup-row{
+    display:flex;
+    gap:12px;
+    align-items:stretch;
+}
+
+#manualPopupInput{
+    flex:1;
+    min-width:0;
+    min-height:64px;
+    padding:10px 14px;
+    border:2px solid #4f46e5;
+    border-radius:14px;
+    font-size:16px!important;
+    color:#111827;
+    outline:none;
+    -webkit-text-size-adjust:100%;
+}
+
+#manualPopupInput:focus{
+    border-color:#4f46e5;
+    box-shadow:0 0 0 3px rgba(79,70,229,.12);
+}
+
+#manualPopupSubmit{
+    flex:0 0 68px;
+    min-width:68px;
+    min-height:64px;
+    border:0;
+    border-radius:14px;
+    background:#16a34a;
+    color:#fff;
+    font-size:18px;
+    font-weight:700;
+    box-shadow:0 4px 12px rgba(22,163,74,.28);
+}
+
+body.manual-popup-open{
+    overflow:hidden!important;
+    overscroll-behavior:none;
+}
+
+/* Khi ban phim mo, khung scanner van dung theo chieu cao truoc khi focus. */
+body.scanner-mode.manual-popup-open,
+body.scanner-mode.manual-popup-open .wrap{
+    height:var(--scanner-locked-height,100dvh)!important;
+    min-height:var(--scanner-locked-height,100dvh)!important;
+}
+
+body.scanner-mode.manual-popup-open #scannerScreen.active-space{
+    height:calc(var(--scanner-locked-height,100dvh) - var(--scanner-top,145px) - 6px)!important;
+    bottom:auto!important;
+}
+
+@media(max-width:420px){
+    .manual-popup{left:10px;right:10px;padding:16px}
+    .manual-popup-row{gap:10px}
+    #manualPopupSubmit{flex-basis:68px;min-width:68px}
+}
