@@ -2,7 +2,6 @@ import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0
 const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform","Thanh V":"https://docs.google.com/forms/d/e/1FAIpQLSdMGu0cHh7d0oF0cwkD8WB_TCahiMz9FVYC4PHEsX3mw2CgHg/viewform","Giấy Tổ Ong":"https://docs.google.com/forms/d/10O2zXGVIvi_fmuvNFBtuDrFBdvtINs_QvlNYv3YHYBU/viewform"};
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar"),departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen"),selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox"),flashButton=document.getElementById("flashButton"),video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox"),imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode"),pasteButton=document.getElementById("pasteButton"),openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm"),btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
-const manualPopupOverlay=document.getElementById("manualPopupOverlay"),manualPopup=document.getElementById("manualPopup"),manualPopupInput=document.getElementById("manualPopupInput"),manualPopupSubmit=document.getElementById("manualPopupSubmit");
 let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false;
 
 function capNhatTrangThaiNutMoForm(){
@@ -376,11 +375,9 @@ window.addEventListener("resize",()=>{
     if(document.body.classList.contains("form-scroll-mode")){
         capNhatKhungForm();
     }
-    // Khi popup dang mo, khong tinh lai scanner theo kich thuoc keyboard.
-    if(document.body.classList.contains("scanner-mode")&&!document.body.classList.contains("manual-popup-open")){
+    if(document.body.classList.contains("scanner-mode")){
         capNhatKhungQuet();
     }
-    capNhatViTriManualPopup();
 });
 window.addEventListener("orientationchange",()=>{
     if(document.body.classList.contains("form-scroll-mode")){
@@ -395,137 +392,6 @@ document.addEventListener("visibilitychange",async()=>{if(document.visibilitySta
 window.addEventListener("pagehide",dungStreamCamera);window.addEventListener("beforeunload",dungStreamCamera);
 async function khoiDong(){try{if(!window.isSecureContext)throw new Error("Trang phải chạy bằng HTTPS.");if(controls&&videoTrack&&videoTrack.readyState==="live"){cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";return}statusBox.textContent="Đang xin quyền Camera...";statusBox.className="status";reader=reader||new BrowserQRCodeReader();controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}},video,function(result){if(result)xuLyMaQuet(result.getText())});const stream=video.srcObject;videoTrack=stream&&stream.getVideoTracks?stream.getVideoTracks()[0]:null;const capabilities=videoTrack&&videoTrack.getCapabilities?videoTrack.getCapabilities():{};if(capabilities&&capabilities.torch===true){flashButton.style.display="block";flashButton.disabled=false;flashButton.style.opacity="1";flashButton.textContent="🔦 BẬT FLASH"}else flashButton.style.display="none";statusBox.textContent="Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status"}catch(e){console.error(e);statusBox.textContent="Không khởi động được Camera: "+(e.message||e);statusBox.className="status error"}}
 imageInput.addEventListener("change",async function(){const file=this.files&&this.files[0];this.value="";if(!file||daQuet)return;try{statusBox.textContent="🖼️ Đang đọc QR từ ảnh...";statusBox.className="status";const dataUrl=await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(new Error("Không đọc được file ảnh."));fr.readAsDataURL(file)});const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error("Không mở được hình ảnh."));img.src=dataUrl});const r=new BrowserQRCodeReader();let result=null;for(const scale of [1,.75,.5,.35]){if(result)break;const canvas=document.createElement("canvas"),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(img,0,0,w,h);const testImg=new Image();await new Promise((resolve,reject)=>{testImg.onload=resolve;testImg.onerror=reject;testImg.src=canvas.toDataURL("image/png")});try{result=await r.decodeFromImageElement(testImg)}catch(_){result=null}}if(!result)throw new Error("Không tìm thấy QR trong hình.");const text=result.getText();xuLyMaQuet(text)}catch(e){console.error(e);statusBox.textContent="❌ Không đọc được QR trong hình. Hãy chọn ảnh QR rõ hơn.";statusBox.className="status error"}});
-
-/* Popup nhap Ma Lenh:
-   Input chinh de readonly de trinh duyet khong tu dong pan/scroll giao dien quet.
-   Input trong popup moi la noi go, nen giao dien phia sau luon giu nguyen vi tri. */
-let manualPopupOpening=false;
-
-function capNhatViTriManualPopup(){
-    if(!manualPopupOverlay||manualPopupOverlay.classList.contains("hidden"))return;
-
-    const vv=window.visualViewport;
-    const popupHeight=manualPopup.offsetHeight||110;
-    const viewportTop=vv?vv.offsetTop:0;
-    const viewportHeight=vv?vv.height:window.innerHeight;
-
-    // Dat popup sat phia tren ban phim (hoac sat day man hinh khi chua co ban phim).
-    let top=viewportTop+viewportHeight-popupHeight-12;
-
-    // Khong cho popup nam sat mep tren.
-    top=Math.max(viewportTop+12,top);
-
-    manualPopup.style.top=Math.round(top)+"px";
-}
-
-function moManualPopup(){
-    if(manualPopupOpening||!manualPopupOverlay)return;
-
-    manualPopupOpening=true;
-
-    // Khoa dung chieu cao scanner TRUOC khi keyboard xuat hien.
-    document.documentElement.style.setProperty(
-        "--scanner-locked-height",
-        window.innerHeight+"px"
-    );
-
-    manualPopupInput.value=manualInput.value||"";
-    manualPopupOverlay.classList.remove("hidden");
-    manualPopupOverlay.setAttribute("aria-hidden","false");
-    document.body.classList.add("manual-popup-open");
-
-    capNhatViTriManualPopup();
-
-    // Focus sau khi popup da hien xong de Android/iOS khong pan giao dien phia sau.
-    requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-            capNhatViTriManualPopup();
-            manualPopupInput.focus({preventScroll:true});
-            setTimeout(capNhatViTriManualPopup,80);
-            setTimeout(capNhatViTriManualPopup,250);
-            manualPopupOpening=false;
-        });
-    });
-}
-
-/* Dong bo gia tri giua o nhap trong popup va o nhap chinh. */
-function dongBoMaLenh(value){
-    const text=String(value??"");
-    if(manualPopupInput&&manualPopupInput.value!==text){
-        manualPopupInput.value=text;
-    }
-    if(manualInput&&manualInput.value!==text){
-        manualInput.value=text;
-    }
-    capNhatTrangThaiNutMoForm();
-}
-
-function dongManualPopup(){
-    if(!manualPopupOverlay)return;
-
-    // Bam ra ngoai popup van phai giu noi dung vua go.
-    dongBoMaLenh(manualPopupInput.value);
-
-    manualPopupInput.blur();
-    manualPopupOverlay.classList.add("hidden");
-    manualPopupOverlay.setAttribute("aria-hidden","true");
-    document.body.classList.remove("manual-popup-open");
-    document.documentElement.style.removeProperty("--scanner-locked-height");
-    manualPopup.style.top="";
-}
-
-function nhapTuManualPopup(){
-    const value=String(manualPopupInput.value||"").trim();
-
-    if(!value){
-        manualPopupInput.focus({preventScroll:true});
-        return;
-    }
-
-    dongBoMaLenh(value);
-    dongManualPopup();
-
-    // Giu lai gia tri o giao dien chinh, sau do mo Form.
-    moGoogleForm(value);
-}
-
-manualInput.addEventListener("click",e=>{
-    e.preventDefault();
-    moManualPopup();
-});
-
-manualInput.addEventListener("touchend",e=>{
-    // iOS co luc xu ly touch truoc click, chan focus input goc.
-    e.preventDefault();
-    moManualPopup();
-},{passive:false});
-
-manualPopupSubmit.addEventListener("click",nhapTuManualPopup);
-
-// Dang go trong popup la o nhap chinh cap nhat ngay lap tuc.
-manualPopupInput.addEventListener("input",()=>{
-    dongBoMaLenh(manualPopupInput.value);
-});
-
-manualPopupInput.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
-        e.preventDefault();
-        nhapTuManualPopup();
-    }
-});
-
-manualPopupOverlay.addEventListener("click",e=>{
-    // Bam vao nen toi thi dong popup, bam trong hop thi giu nguyen.
-    if(e.target===manualPopupOverlay){
-        dongManualPopup();
-    }
-});
-
-if(window.visualViewport){
-    window.visualViewport.addEventListener("resize",capNhatViTriManualPopup);
-    window.visualViewport.addEventListener("scroll",capNhatViTriManualPopup);
-}
-
 pasteButton.addEventListener("click",async()=>{
 try{
 let text="";

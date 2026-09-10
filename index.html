@@ -12,16 +12,6 @@
 </head>
 <body class="home-mode">
 
-<div id="manualPopupOverlay" class="manual-popup-overlay hidden" aria-hidden="true">
-    <div id="manualPopup" class="manual-popup" role="dialog" aria-modal="true" aria-labelledby="manualPopupTitle">
-        <div id="manualPopupTitle" class="manual-popup-title">Nhập Mã Lệnh hoặc Chuỗi QR</div>
-        <div class="manual-popup-row">
-            <input id="manualPopupInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Nhập Mã Lệnh hoặc Chuỗi QR">
-            <button id="manualPopupSubmit" type="button" aria-label="OK">OK</button>
-        </div>
-    </div>
-</div>
-
 <div id="warningModal" class="modal-overlay hidden">
 <div class="modal-box">
 <div id="warningTitle" class="modal-title">⚠️ Cảnh báo</div>
@@ -34,7 +24,7 @@
 <div id="departmentScreen"><div class="department-title">Chọn bộ phận</div><div class="department-grid"><button class="department-button" data-department="In">🖨️ IN</button><button class="department-button" data-department="Bế">✂️ BẾ</button><button class="department-button" data-department="Thành Phẩm">📦 THÀNH PHẨM</button><button class="department-button" data-department="Kho">🏭 KHO</button><button class="department-button" data-department="Thanh V">📝 THANH V</button><button class="department-button" data-department="Giấy Tổ Ong">🐝 GIẤY TỔ ONG</button></div></div>
 <div id="scannerScreen" class="hidden"><div class="camera" id="cameraBox"><video id="video" playsinline muted></video><div class="scan-box"></div></div><div class="camera-controls"><button id="flashButton" class="flash-button" type="button" style="display:none;">🔦 BẬT FLASH</button></div><div id="status" class="status">Đang tải bộ quét QR...</div><div id="imageScanBox"><input id="imageInput" type="file" accept="image/*"><label id="imagePicker" for="imageInput">🖼️ Chọn Ảnh Quét QR</label></div><div class="manual" id="manualBox">
 <label class="manual-label" for="manualCode">Nhập Mã Lệnh hoặc Chuỗi QR</label>
-<input id="manualCode" type="text" autocomplete="off" readonly aria-label="Nhập Mã Lệnh hoặc Chuỗi QR" placeholder="Nhập Mã Lệnh hoặc Chuỗi QR">
+<input id="manualCode" type="text" autocomplete="off" placeholder="Nhập Mã Lệnh hoặc Chuỗi QR">
 <div class="manual-buttons">
 <button id="pasteButton" type="button">📋 Dán</button>
 <button id="openButton" type="button" disabled>Mở Form</button>
