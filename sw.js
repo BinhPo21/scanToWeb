@@ -1,7 +1,7 @@
 // Service Worker cho PWA
 // Dung duong dan tuong doi de chay dung tren GitHub Pages
 
-const CACHE_NAME = "scanToWeb-v57-pwa-2";
+const CACHE_NAME = "scanToWeb-v58-pwa-1";
 
 const APP_FILES = [
     "./",
