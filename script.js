@@ -2,7 +2,7 @@ import {BrowserQRCodeReader} from "https://cdn.jsdelivr.net/npm/@zxing/browser@0
 const DEPARTMENTS={"In":"https://docs.google.com/forms/d/1pfub1V_xXJTh53rsYOdPeIXqnOylyFWuJ-BCkDMrLRI/viewform","Bế":"https://docs.google.com/forms/d/1QamFMLVFpol0mLwrChpzOngo8LcWs84s2dmoHvbHR1o/viewform","Thành Phẩm":"https://docs.google.com/forms/d/1moque230vLB5bvTfCYZ9zqnr7_gCCsRH-EHVxoJvBIQ/viewform","Kho":"https://docs.google.com/forms/d/1L7CRNFqkQcH4soZEJyr8FmByHzOdp3Gdsrjouf8gT-4/viewform","Thanh V":"https://docs.google.com/forms/d/e/1FAIpQLSdMGu0cHh7d0oF0cwkD8WB_TCahiMz9FVYC4PHEsX3mw2CgHg/viewform","Giấy Tổ Ong":"https://docs.google.com/forms/d/10O2zXGVIvi_fmuvNFBtuDrFBdvtINs_QvlNYv3YHYBU/viewform"};
 const ENTRY_IDS=["entry.392564381","entry.682796725","entry.260788272","entry.312519866","entry.697190504"];
 const appHeader=document.getElementById("appHeader"),departmentBar=document.getElementById("departmentBar"),departmentScreen=document.getElementById("departmentScreen"),scannerScreen=document.getElementById("scannerScreen"),selectedDepartment=document.getElementById("selectedDepartment"),changeDepartment=document.getElementById("changeDepartment"),cameraBox=document.getElementById("cameraBox"),flashButton=document.getElementById("flashButton"),video=document.getElementById("video"),statusBox=document.getElementById("status"),imageScanBox=document.getElementById("imageScanBox"),imageInput=document.getElementById("imageInput"),manualBox=document.getElementById("manualBox"),manualInput=document.getElementById("manualCode"),pasteButton=document.getElementById("pasteButton"),openButton=document.getElementById("openButton"),formContainer=document.getElementById("formContainer"),googleForm=document.getElementById("googleForm"),btnScanAgain=document.getElementById("btnScanAgain"),btnHome=document.getElementById("btnHome");
-let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false;
+let reader=null,controls=null,daQuet=false,boPhanDangChon=null,videoTrack=null,flashDangBat=false,phienXuLyToLenh=0;
 
 function capNhatTrangThaiNutMoForm(){
 const coDuLieu=String(manualInput.value||"").trim().length>0;
@@ -30,89 +30,102 @@ return String(value??"")
     .replace(/,0/g,"")
     .replace(/\./g,"");
 }
-async function taoLinkForm(chuoiQR){
+function taoUrlGoogleForm(giaTri){
 if(!boPhanDangChon)throw new Error("Chưa chọn bộ phận.");
-
-let parts=tachGiaTriQR(chuoiQR);
-let maLenh="";
-let qr5=null;
-let canKiemTra=false;
-
-if(parts.length===1){
-    maLenh=parts[0];
-}else if(parts.length===6){
-    parts.splice(4,1);
-    qr5=parts;
-    qr5[3]=chuanHoaKichDon(qr5[3]);
-    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
-    maLenh=qr5[2];
-    canKiemTra=true;
-}else if(parts.length===5){
-    qr5=parts;
-    qr5[3]=chuanHoaKichDon(qr5[3]);
-    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
-    maLenh=qr5[2];
-    canKiemTra=true;
-}else{
-    throw new Error("QR không đúng cấu trúc: chỉ hỗ trợ 1, 5 hoặc 6 mã.");
-}
-
-maLenh=boScale10(maLenh);
-if(!maLenh)throw new Error("Không tìm thấy Mã Lệnh.");
-
-const ketQua=await traCuuMaLenh(maLenh);
-
-let partsKetQua;
-
-if(ketQua){
-    // Có dữ liệu Google Sheet
-    partsKetQua=tachGiaTriQR(ketQua);
-
-    // Quy Cách Đơn Hàng: quy dấu "." và "," về cùng dấu ",",
-    // sau đó bỏ toàn bộ ",0".
-    partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
-
-    // Số Lượng Đơn Hàng: bỏ toàn bộ ",0".
-    partsKetQua[4]=chuanHoaSoLuongDonHang(partsKetQua[4]);
-
-    if(partsKetQua.length!==5){
-        throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
-    }
-}else if(parts.length===1){
-    // QR chỉ có 1 mã:
-    // Không tìm thấy Google Sheet sau 5 lần vẫn mở Form.
-    // Chỉ điền Mã Lệnh, các trường khác để trống.
-    partsKetQua=["","",maLenh,"",""];
-}else{
-    // QR 5/6 mã:
-    // Không tìm thấy Google Sheet sau 5 lần thì bỏ qua kiểm tra
-    // và dùng dữ liệu QR đã quy về 5 mã.
-    partsKetQua=qr5;
-}
-
-const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng Đơn Hàng"];
-const sai=[];
-
-if(canKiemTra && ketQua){
-    for(let i=0;i<5;i++){
-        // Mã Lệnh (vị trí 3) luôn cố định, không đưa vào cảnh báo.
-        if(i===2)continue;
-        if(qr5[i]!==partsKetQua[i]){
-            sai.push({ten:tenTruong[i],qr:qr5[i],sheet:partsKetQua[i]});
-        }
-    }
+if(!Array.isArray(giaTri)||giaTri.length!==5){
+    throw new Error("Không lấy được đủ 5 giá trị để mở Form.");
 }
 
 const p=new URLSearchParams();
 p.set("usp","pp_url");
-ENTRY_IDS.forEach((id,i)=>p.set(id,partsKetQua[i].trim()));
+ENTRY_IDS.forEach((id,i)=>p.set(id,String(giaTri[i]??"").trim()));
 
-return {
-    url:DEPARTMENTS[boPhanDangChon]+"?"+p.toString(),
-    canWarn:canKiemTra,
-    sai:sai
-};
+return DEPARTMENTS[boPhanDangChon]+"?"+p.toString();
 }
+
+function docDuLieuQR(chuoiQR){
+let parts=tachGiaTriQR(chuoiQR);
+let maLenh="";
+let qr5=null;
+let loai=0;
+
+if(parts.length===1){
+    maLenh=boScale10(parts[0]);
+    loai=1;
+}else if(parts.length===6){
+    // QR 6 ma: bo gia tri thu 5, sau do xu ly nhu QR 5 ma.
+    parts.splice(4,1);
+    qr5=parts;
+    qr5[3]=chuanHoaKichDon(qr5[3]);
+    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
+    maLenh=boScale10(qr5[2]);
+    loai=6;
+}else if(parts.length===5){
+    qr5=parts;
+    qr5[3]=chuanHoaKichDon(qr5[3]);
+    qr5[4]=chuanHoaSoLuongDonHang(qr5[4]);
+    maLenh=boScale10(qr5[2]);
+    loai=5;
+}else{
+    throw new Error("QR không đúng cấu trúc: chỉ hỗ trợ 1, 5 hoặc 6 mã.");
+}
+
+if(!maLenh)throw new Error("Không tìm thấy Mã Lệnh.");
+
+return {loai,maLenh,qr5};
+}
+
+function chuanHoaDuLieuSheet(ketQua){
+const partsKetQua=tachGiaTriQR(ketQua);
+
+if(partsKetQua.length!==5){
+    throw new Error("Không lấy được đủ 5 giá trị từ Mã Lệnh.");
+}
+
+partsKetQua[3]=chuanHoaKichDon(partsKetQua[3]);
+partsKetQua[4]=chuanHoaSoLuongDonHang(partsKetQua[4]);
+
+return partsKetQua;
+}
+
+function timGiaTriKhac(qr5,partsKetQua){
+const tenTruong=["Khách Hàng","Đơn Hàng","Mã Lệnh","Kích Đơn","Số Lượng Đơn Hàng"];
+const sai=[];
+
+for(let i=0;i<5;i++){
+    // Mã Lệnh luôn là khóa tra cứu, không đưa vào cảnh báo.
+    if(i===2)continue;
+
+    if(qr5[i]!==partsKetQua[i]){
+        sai.push({ten:tenTruong[i],qr:qr5[i],sheet:partsKetQua[i]});
+    }
+}
+
+return sai;
+}
+
+async function taoLinkFormMotMa(chuoiQR){
+const duLieu=docDuLieuQR(chuoiQR);
+
+if(duLieu.loai!==1){
+    throw new Error("Hàm này chỉ dùng cho QR 1 mã.");
+}
+
+const ketQua=await traCuuMaLenh(duLieu.maLenh);
+let partsKetQua;
+
+if(ketQua){
+    partsKetQua=chuanHoaDuLieuSheet(ketQua);
+}else{
+    // Giữ nguyên logic cũ của QR 1 mã.
+    // Không tìm thấy trên Google Sheet vẫn mở Form,
+    // chỉ điền Mã Lệnh.
+    partsKetQua=["","",duLieu.maLenh,"",""];
+}
+
+return taoUrlGoogleForm(partsKetQua);
+}
+
 async function tatFlash(){if(videoTrack){try{if(videoTrack.getCapabilities&&videoTrack.getCapabilities().torch)await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}}flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH"}
 async function dungCamera(){if(videoTrack){try{await videoTrack.applyConstraints({advanced:[{torch:false}]})}catch(_){}videoTrack=null}flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none";if(controls){try{controls.stop()}catch(_){}controls=null}}
 function xuLyMaQuet(text){
@@ -125,14 +138,50 @@ function xuLyMaQuet(text){
     moGoogleForm(value);
 }
 async function moGoogleForm(chuoiQR){
+const phienXuLy=++phienXuLyToLenh;
+
 try{
-statusBox.textContent="⏳ Đang tra cứu Mã Lệnh...";
-statusBox.className="status";
+    const duLieu=docDuLieuQR(chuoiQR);
 
-const result=await taoLinkForm(chuoiQR);
+    // QR 1 mã giữ nguyên hoàn toàn thuật toán cũ:
+    // tra cứu Sheet trước để lấy đủ dữ liệu rồi mới mở Form.
+    if(duLieu.loai===1){
+        statusBox.textContent="⏳ Đang tra cứu Mã Lệnh...";
+        statusBox.className="status";
 
+        const url=await taoLinkFormMotMa(chuoiQR);
+        if(phienXuLy!==phienXuLyToLenh)return;
+
+        hienThiManHinhForm();
+        statusBox.textContent="✅ Đã quét. Điền thông tin rồi bấm Gửi.";
+        statusBox.className="status ok";
+        moFormSauKhiKiemTra(url);
+        return;
+    }
+
+    // QR 5/6 mã:
+    // 1. Mở Form NGAY bằng dữ liệu vừa quét.
+    // 2. Sau đó mới tra cứu Google Sheet ở chế độ nền.
+    const urlTuQR=taoUrlGoogleForm(duLieu.qr5);
+
+    hienThiManHinhForm();
+    statusBox.textContent="✅ Đã mở Form. Đang kiểm tra dữ liệu mới nhất...";
+    statusBox.className="status ok";
+    moFormSauKhiKiemTra(urlTuQR);
+
+    kiemTraSheetSauKhiMoForm(duLieu,phienXuLy);
+
+}catch(e){
+    console.error(e);
+    statusBox.textContent=e.message;
+    statusBox.className="status error";
+    daQuet=false;
+}
+}
+
+function hienThiManHinhForm(){
 daQuet=true;
-await tatFlash();
+tatFlash().catch(()=>{});
 cameraBox.classList.add("hidden");
 imageScanBox.classList.add("hidden");
 manualBox.classList.add("hidden");
@@ -140,19 +189,33 @@ scannerScreen.classList.add("hidden");
 appHeader.classList.add("active");
 departmentBar.classList.remove("hidden");
 formContainer.classList.add("active-space");
-statusBox.textContent="✅ Đã quét. Điền thông tin rồi bấm Gửi.";
-statusBox.className="status ok";
-
-if(result&&result.canWarn&&result.sai&&result.sai.length){
-    hienCanhBao(result.sai, result.url);
-}else{
-    moFormSauKhiKiemTra(result.url);
 }
+
+async function kiemTraSheetSauKhiMoForm(duLieu,phienXuLy){
+try{
+    const ketQua=await traCuuMaLenh(duLieu.maLenh);
+
+    // Neu nguoi dung da quet lenh khac trong luc dang tra cuu,
+    // bo qua ket qua cu.
+    if(phienXuLy!==phienXuLyToLenh)return;
+
+    // Không có dữ liệu Sheet thì giữ nguyên Form đang mở từ QR.
+    if(!ketQua)return;
+
+    const partsKetQua=chuanHoaDuLieuSheet(ketQua);
+    const sai=timGiaTriKhac(duLieu.qr5,partsKetQua);
+
+    // Đúng hoàn toàn: không làm gì, Form đang mở tiếp tục sử dụng.
+    if(!sai.length)return;
+
+    // Khác dữ liệu: cảnh báo. Khi bấm OK sẽ tải lại Form
+    // bằng dữ liệu mới nhất lấy từ Google Sheet.
+    const urlMoi=taoUrlGoogleForm(partsKetQua);
+    hienCanhBao(sai,urlMoi);
+
 }catch(e){
-console.error(e);
-statusBox.textContent=e.message;
-statusBox.className="status error";
-daQuet=false;
+    // Lỗi kiểm tra nền không được làm gián đoạn Form đã mở.
+    console.error("Kiểm tra Google Sheet thất bại:",e);
 }
 }
 
@@ -439,6 +502,7 @@ moGoogleForm(value);
 }
 });
 btnScanAgain.addEventListener("click",async()=>{
+phienXuLyToLenh++;
 const bottomButtons=document.getElementById("bottomButtons");
 if(bottomButtons)bottomButtons.style.display="none";
 
@@ -452,6 +516,7 @@ capNhatKhungQuet();
 formContainer.style.display="none";formContainer.classList.remove("active-space");scannerScreen.classList.remove("hidden");scannerScreen.classList.add("active-space");capNhatKhungQuet();requestAnimationFrame(capNhatKhungQuet);cameraBox.classList.remove("hidden");imageScanBox.classList.remove("hidden");manualBox.classList.remove("hidden");appHeader.classList.add("active");departmentBar.classList.remove("hidden");daQuet=false;statusBox.textContent="📷 Sẵn sàng - đưa QR vào giữa khung.";statusBox.className="status";if(!controls||!videoTrack||videoTrack.readyState!=="live")await khoiDong();window.scrollTo({top:0,behavior:"smooth"})});
 flashButton.addEventListener("click",async()=>{if(!videoTrack||!videoTrack.getCapabilities){statusBox.textContent="⚠️ Điện thoại/trình duyệt không hỗ trợ bật Flash từ web.";statusBox.className="status error";return}const capabilities=videoTrack.getCapabilities();if(!capabilities.torch){statusBox.textContent="⚠️ Camera này không cho phép web điều khiển Flash.";statusBox.className="status error";return}try{flashDangBat=!flashDangBat;await videoTrack.applyConstraints({advanced:[{torch:flashDangBat}]});flashButton.classList.toggle("on",flashDangBat);flashButton.textContent=flashDangBat?"💡 TẮT FLASH":"🔦 BẬT FLASH"}catch(error){flashDangBat=false;flashButton.classList.remove("on");flashButton.textContent="🔦 BẬT FLASH";flashButton.style.display="none"}});
 async function veChonBoPhan(){
+phienXuLyToLenh++;
 try{
 localStorage.removeItem("boPhanGanNhat");
 }catch(_){}
