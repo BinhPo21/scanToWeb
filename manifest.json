@@ -1,6 +1,6 @@
 {
-  "name": "Quét QR Tờ Lệnh 3/2",
-  "short_name": "QR Tờ Lệnh",
+  "name": "Quét QR 3/2",
+  "short_name": "QR 3/2",
   "description": "Ứng dụng quét QR Tờ Lệnh 3/2",
   "id": "./",
   "start_url": "./",
