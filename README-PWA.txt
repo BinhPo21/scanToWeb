@@ -31,3 +31,6 @@ V57-PWA-2 - FIX BAN PHIM ANDROID:
 - Bo khoa chieu cao scanner bang 100vh/100dvh.
 - Khi ban phim mo, Chrome Android co the resize layout viewport de tranh khoang trong lon phia duoi.
 - Logic script.js khong thay doi.
+
+
+V58: QR 5/6 ma mo Google Form ngay bang du lieu QR, sau do kiem tra Google Sheet nen. Neu khac, bam OK de tai lai Form bang du lieu moi nhat. QR 1 ma giu nguyen logic cu.
