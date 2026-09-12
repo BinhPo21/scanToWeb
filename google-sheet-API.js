@@ -20,8 +20,7 @@
 // CONFIG API
 // ============================================================
 
-const CONFIG_URL =
-    "https://raw.githubusercontent.com/BinhPo21/scanToWeb/refs/heads/main/configAPI.json";
+const CONFIG_URL = "./configAPI.json";
 
 
 // ============================================================
