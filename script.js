@@ -410,7 +410,7 @@ if(BO_PHAN_KHONG_QUET_QR.includes(boPhanDangChon)){
 // Cac bo phan khac quay lai giao dien quet QR binh thuong.
 btnScanAgain.style.display="";
 btnScanAgain.style.flex="";
-btnScanAgain.innerHTML="🔄 Quét Tờ Lệnh Khác";
+btnScanAgain.innerHTML="⛶ Quét Tờ Lệnh Khác";
 btnHome.style.flex="";
 
 document.body.classList.remove("form-scroll-mode");
